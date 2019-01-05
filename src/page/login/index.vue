@@ -83,7 +83,7 @@ export default {
     },
     methods: {
         ...mapActions({
-            login: 'auth/loginByEmail',
+            login: 'auth/login',
             loadLang: 'loadLang'
         }),
         submitForm(){

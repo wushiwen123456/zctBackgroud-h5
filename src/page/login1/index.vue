@@ -1,12 +1,12 @@
 <template>
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-      <h3 class="title">vue-admin-template</h3>
+      <h3 class="title">Coincobo 数字资产后台管理系统</h3>
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
-        <el-input v-model="loginForm.username" name="username" type="text" auto-complete="on" placeholder="username" />
+        <el-input v-model="loginForm.username" name="username" type="text" auto-complete="on" placeholder="用户名" />
       </el-form-item>
       <el-form-item prop="password">
         <span class="svg-container">
@@ -17,7 +17,7 @@
           v-model="loginForm.password"
           name="password"
           auto-complete="on"
-          placeholder="password"
+          placeholder="密码"
           @keyup.enter.native="handleLogin" />
         <span class="show-pwd" @click="showPwd">
           <svg-icon icon-class="eye" />
@@ -25,61 +25,38 @@
       </el-form-item>
       <el-form-item>
         <el-button :loading="loading" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
-          Sign in
+          登 录
         </el-button>
       </el-form-item>
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: admin</span>
-      </div>
+      <div v-if="sysMsg" class="err-msg">{{sysMsg}}</div>
     </el-form>
   </div>
 </template>
 
 <script>
 //import { isvalidUsername } from '@/utils/validate'
-
+import { mapActions } from 'vuex'
 export default {
   name: 'Login',
   data() {
-    const validateUsername = (rule, value, callback) => {
-      // if (!isvalidUsername(value)) {
-      //   callback(new Error('请输入正确的用户名'))
-      // } else {
-      //   callback()
-      // }
-      callback()
-    }
-    const validatePass = (rule, value, callback) => {
-      if (value.length < 5) {
-        callback(new Error('密码不能小于5位'))
-      } else {
-        callback()
-      }
-    }
     return {
       loginForm: {
-        username: 'admin',
-        password: 'admin'
+        username: '',
+        password: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePass }]
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入用密码', trigger: 'blur'}]
       },
       loading: false,
       pwdType: 'password',
-      redirect: undefined
-    }
-  },
-  watch: {
-    $route: {
-      handler: function(route) {
-        this.redirect = route.query && route.query.redirect
-      },
-      immediate: true
+      sysMsg: ''
     }
   },
   methods: {
+    ...mapActions({
+            login: 'auth/login'
+        }),
     showPwd() {
       if (this.pwdType === 'password') {
         this.pwdType = ''
@@ -88,12 +65,19 @@ export default {
       }
     },
     handleLogin() {
+
       this.$refs.loginForm.validate(valid => {
+        this.sysMsg = '';
         if (valid) {
           this.loading = true
-          this.$store.dispatch('Login', this.loginForm).then(() => {
+          
+          this.login(this.loginForm).then((res) => {
             this.loading = false
-            this.$router.push({ path: this.redirect || '/' })
+            if (res.code == 200) {
+              this.$router.push('home')
+            } else {
+              this.sysMsg = res.error;
+            }
           }).catch(() => {
             this.loading = false
           })
@@ -110,7 +94,9 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 $bg:#2d3a4b;
 $light_gray:#eee;
-
+.err-msg{
+        color: #f56c6c;
+    }
 /* reset element-ui css */
 .login-container {
   .el-input {

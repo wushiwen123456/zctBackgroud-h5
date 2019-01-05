@@ -1,6 +1,6 @@
 // 生产环境中注释掉以下语句
-import 'sysStatic/css/theme-default.scss'
-import '../mock/index.js'
+ import 'sysStatic/css/theme-default.scss'
+// import '../mock/index.js'
 
 import 'babel-polyfill'
 import Vue from "vue"

@@ -76,7 +76,7 @@ const service = axios.create({
 });
 
 // baseURL
-// axios.defaults.baseURL = 'https://api.github.com';
+axios.defaults.baseURL = 'http://localhost';
 
 // http request 拦截器
 // 每次请求都为http头增加Authorization字段，其内容为token
@@ -86,11 +86,11 @@ service.interceptors.request.use(
         config.cancelToken = new CancelToken(function executor(c) {
             cancel = c;
         })
-        checkToken(cancel, function(){
-            Auth.setLoginStatus()
-            config.headers.Authorization = `${store.state.user.token}`
-        })
-        stopRepeatRequest(config.url, cancel)
+        // checkToken(cancel, function(){
+        //     Auth.setLoginStatus()
+        //     config.headers.Authorization = `${store.state.user.token}`
+        // })
+        //stopRepeatRequest(config.url, cancel)
         return config
     },
     err => {
@@ -102,15 +102,15 @@ service.interceptors.request.use(
 // 针对响应代码确认跳转到对应页面
 service.interceptors.response.use(
     response => {
-        for( let i = 0; i < requestList.length; i++){
-            if(requestList[i] == response.config.url){
-                // 注意，不能保证500ms必定执行，详情请了解JS的异步机制
-                setTimeout(function(){
-                    requestList.splice(i,1)
-                }, 500)
-                break
-            }
-        }
+        // for( let i = 0; i < requestList.length; i++){
+        //     if(requestList[i] == response.config.url){
+        //         // 注意，不能保证500ms必定执行，详情请了解JS的异步机制
+        //         setTimeout(function(){
+        //             requestList.splice(i,1)
+        //         }, 500)
+        //         break
+        //     }
+        // }
         return Promise.resolve(response.data)
     },
     error => {

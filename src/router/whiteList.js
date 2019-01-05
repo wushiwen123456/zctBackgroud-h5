@@ -2,6 +2,7 @@
 const whiteList = [
     '/login',
     '/login1',
+    '/home',
     '/register',
     '/notice',
     '/maintenance'
