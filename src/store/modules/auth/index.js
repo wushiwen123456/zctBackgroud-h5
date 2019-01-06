@@ -14,7 +14,7 @@ const mutations = {
     },
 
     setToken: (state, data) => {
-        if(data){
+        if(data.token){
             Auth.setToken(data)
             Auth.setLoginStatus(data)
         } else {
