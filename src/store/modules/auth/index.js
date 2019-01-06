@@ -1,6 +1,7 @@
-//import Cookies from 'js-cookie'
+import Cookies from 'js-cookie'
 import userAction from '@/api/login'
 import Auth from '@/util/auth'
+import router from '../../../router';
 
 const state = {
     token: '',
@@ -8,19 +9,19 @@ const state = {
 }
 
 const mutations = {
-    setNavList: (state, data) => {
+    setMenuList: (state, data) => {
         state.navList = data
     },
 
     setToken: (state, data) => {
         if(data){
             Auth.setToken(data)
-            Auth.setLoginStatus()
+            Auth.setLoginStatus(data)
         } else {
             Auth.removeToken()
             Auth.removeLoginStatus()
         }
-        state.token = data
+        state.token = data.token
     }
 }
 
@@ -32,8 +33,7 @@ const actions = {
             userAction.login(userInfo)
             .then(res => {
                 if(res){
-                    //commit('setToken', res.token)
-                    //commit('user/setName', res.name, { root: true })
+                    commit('setToken', res.data)
                 }
                 resolve(res)
             })
@@ -45,7 +45,7 @@ const actions = {
     // 登出
     logout({commit}) {
         return new Promise((resolve) => {
-            commit('setToken', '')
+            commit('setToken', {'token':''})
             commit('user/setName', '', { root: true })
             commit('tagNav/removeTagNav', '', {root: true})
             resolve()
@@ -54,55 +54,53 @@ const actions = {
 
     // 重新获取用户信息及Token
     // TODO: 这里不需要提供用户名和密码，实际中请根据接口自行修改
-    // relogin({dispatch, commit, state}){
-    //     return new Promise((resolve) => {
-    //         // 根据Token进行重新登录
-    //         let token = Cookies.get('token'),
-    //             userName = Cookies.get('userName')
+    relogin({dispatch, commit, state}){
+        return new Promise((resolve) => {
+            // 根据Token进行重新登录
+            let token = Cookies.get('token'),
+                userName = Cookies.get('userName')
 
-    //         // 重新登录时校验Token是否存在，若不存在则获取
-    //         if(!token){
-    //             dispatch("getNewToken").then(() => {
-    //                 commit('setToken', state.token)
-    //             })
-    //         } else {
-    //             commit('setToken', token)
-    //         }
-    //         // 刷新/关闭浏览器再进入时获取用户名
-    //         commit('user/setName', decodeURIComponent(userName), { root: true })
-    //         resolve()
-    //     })
-    // },
+            // 重新登录时校验Token是否存在，若不存在则获取
+            
+            if(token != 'undefined'){
+                commit('setToken', {'token':token})
+                dispatch("refreshToken")
+            } else {
+                dispatch("logout");
+                router.push('/');
+            }
+            // 刷新/关闭浏览器再进入时获取用户名
+            commit('user/setName', decodeURIComponent(userName), { root: true })
+            resolve()
+        })
+    },
 
-    // // 获取新Token
-    // getNewToken({commit, state}){
-    //     return new Promise((resolve) => {
-    //         axios({
-    //             url: '/getToken',
-    //             method: 'get',
-    //             param: {
-    //                 token: state.token
-    //             }
-    //         }).then((res) =>{
-    //             commit("setToken", res.token)
-    //             resolve()
-    //         })
-    //     })
-    // },
+    // 获取新Token
+    refreshToken({dispatch, commit, state}){
+        return new Promise((resolve) => {
+            userAction.refreshToken(state.token)
+            .then((res) =>{
+                if (res.code == 200){
+                    commit('setToken', res.data)
+                } else {
+                    dispatch("logout");
+                    router.push('/');
+                }
+                resolve()
+            })
+        })
+    },
 
-    // // 获取该用户的菜单列表
-    // getNavList({commit}){
-    //     return new Promise((resolve) =>{
-    //         axios({
-    //             url: '/user/navlist',
-    //             methods: 'post',
-    //             data: {}
-    //         }).then((res) => {
-    //             commit("setNavList", res)
-    //             resolve(res)
-    //         })
-    //     })
-    // },
+    // 获取该用户的菜单列表
+    getMenuList({commit}){
+        return new Promise((resolve) =>{
+            userAction.getMenuList()
+            .then((res) => {
+                commit("setMenuList", res.data)
+                resolve(res.data)
+            })
+        })
+    },
 
     // 将菜单列表扁平化形成权限列表
     getPermissionList({state}){

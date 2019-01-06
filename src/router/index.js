@@ -14,12 +14,12 @@ function initRoute(router){
     return new Promise((resolve) => {
         if(permissionList.length == 0){
             console.log("没有权限数据，正在获取")
-            store.dispatch('auth/getNavList').then(() => {
+            store.dispatch('auth/getMenuList').then(() => {
                 store.dispatch('auth/getPermissionList').then((res) => {
                     console.log("权限列表生成完毕")
                     permissionList = res
                     res.forEach(function(v){
-                        let routeItem = router.match(v.path)
+                        let routeItem = router.match(v.name)
                         if(routeItem){
                             routeItem.meta.permission = v.permission ? v.permission : []
                             routeItem.meta.name = v.name
@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
     if (Auth.isLogin()) {
         // 如果当前处于登录状态，并且跳转地址为login，则自动跳回系统首页
         // 这种情况出现在手动修改地址栏地址时
-        if (to.path === '/login') {
+        if (to.path === '/login1') {
             next({path: "/home", replace: true})
         } else if(to.path.indexOf("/error") >= 0){
             // 防止因重定向到error页面造成beforeEach死循环
@@ -64,18 +64,19 @@ router.beforeEach((to, from, next) => {
             initRoute(router).then(() => {
                 let isPermission = false
                 console.log("进入权限判断")
-                permissionList.forEach((v) => {
-                    // 判断跳转的页面是否在权限列表中
-                    if(v.path == to.fullPath){
-                        isPermission = true
-                    }
-                })
-                // 没有权限时跳转到401页面
-                if(!isPermission){
-                    next({path: "/error/401", replace: true})
-                } else {
-                    next()
-                }
+                next()
+                // permissionList.forEach((v) => {
+                //     // 判断跳转的页面是否在权限列表中
+                //     if(v.path == to.fullPath){
+                //         isPermission = true
+                //     }
+                // })
+                // // 没有权限时跳转到401页面
+                // if(!isPermission){
+                //     next({path: "/error/401", replace: true})
+                // } else {
+                //     next()
+                // }
             })
         }
     } else {

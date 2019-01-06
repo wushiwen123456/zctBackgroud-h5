@@ -7,8 +7,7 @@ function random(n) {
 
 const userAction = {
   login : function(userinfo) {
-
-    var arr=new Array()
+    var arr = new Array()
     arr.push(new Date().getTime())
     arr.push(random(3))
     return request({
@@ -19,7 +18,20 @@ const userAction = {
         'codeId' :  arr.join("")
       }
     })
+  },
+  refreshToken : function(token) {
+    return  request({
+        url: '/admin/index/refreshToken/' + token,
+        method: 'get'
+    })
+  },
+  getMenuList : function(){
+    return request({
+      url: '/admin/index/getMenuList',
+      methods: 'get'
+    });
   }
+  
 }
 export default userAction
 // export function getInfo(token) {

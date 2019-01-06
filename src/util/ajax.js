@@ -7,6 +7,7 @@ import store from '../store'
 import router from '../router'
 import { Message } from 'element-ui'
 import Auth from '@/util/auth'
+import { stringify } from 'querystring';
 
 var getTokenLock = false,
     CancelToken = axios.CancelToken,
@@ -20,29 +21,17 @@ var getTokenLock = false,
  *              自动获取Token：过期时自动调用获取Token接口。注意：当有任一请求在获取Token时，其余请求将顺延，直至新Token获取完毕
  *              跳转授权Token：过期时中断当前所有请求并跳转到对应页面获取Token。注意：跳转页面授权最佳实现应在授权页面点击触发
  */
-function checkToken(cancel, callback){
+function checkToken(callback){
     if(!Auth.hasToken()){
         // 自动获取Token
-        if(Auth.tokenTimeoutMethod == "getNewToken"){
+        if(Auth.tokenTimeoutMethod == "refreshToken"){
             // 如果当前有请求正在获取Token
-            if(getTokenLock){
-                setTimeout(function(){
-                    checkToken(cancel, callback)
-                }, 500)
-            } else {
-                getTokenLock = true
-                store.dispatch("auth/getNewToken").then(() => {
-                    console.log("已获取新token")
-                    callback()
-                    getTokenLock = false
-                })
-            }
-        }
-        // 跳转授权Token
-        if(Auth.tokenTimeoutMethod == "jumpAuthPage" && Auth.isLogin()){
+            store.dispatch("auth/refreshToken").then(() => {
+                console.log("已获取新token")
+                callback()
+            })
+        } else if(Auth.tokenTimeoutMethod == "jumpAuthPage"){// 跳转授权Token
             if(router.currentRoute.path != '/auth'){
-                // BUG: 无法保证一定会中断所有请求
-                cancel()
                 router.push('/auth')
             }
         }
@@ -86,14 +75,15 @@ service.interceptors.request.use(
         config.cancelToken = new CancelToken(function executor(c) {
             cancel = c;
         })
-        // checkToken(cancel, function(){
-        //     Auth.setLoginStatus()
-        //     config.headers.Authorization = `${store.state.user.token}`
-        // })
+        checkToken(function(){
+            //config.headers.Authorization = `${store.state.user.token}`
+            config.headers.authKey = store.state.auth.token
+        })
         //stopRepeatRequest(config.url, cancel)
         return config
     },
     err => {
+        console.log(err);
         return Promise.reject(err);
     }
 );
@@ -118,12 +108,14 @@ service.interceptors.response.use(
             console.log(error)
             return Promise.reject("Ajax Abort: 该请求在axios拦截器中被中断")
         } else if (error.response) {
+            let ret = JSON.stringify(error.response);
             switch (error.response.status) {
                 case 401:
                     router.push('error/401');
                 case 403:
                     router.push('error/403');
                 default: 
+                console.log(ret);
                     Message({
                         message: `服务器错误！错误代码：${error.response.status}`,
                         type: 'error'
