@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 import userAction from '@/api/login'
 import Auth from '@/util/auth'
 import router from '../../../router';
+import Home from '@/page/layout'
 
 const state = {
     token: '',
@@ -38,8 +39,6 @@ const actions = {
                 resolve(res)
             })
         });
-
-        
     },
 
     // 登出
@@ -119,8 +118,61 @@ const actions = {
             flatNavList(state.navList)
             resolve(permissionList)
         })
+    },
+
+    // 将菜单列表扁平化形成权限列表
+    updateAppRoute({state}){
+        return new Promise((resolve) =>{
+            const appRoutes = []
+            // 将菜单数据扁平化为一级
+            function formatRoutes(menu){
+                const menuList = menu
+                menuList.forEach(item => {
+                    let componet, child
+                    if (item.level == 1)
+                        componet = Home
+                    else {
+                        let path = item.name
+                        let pathItem = path.split('/')
+                        let cName = pathItem[pathItem.length - 1]
+                        let componentPath = "src/page/" + cName
+                        componet = () => require(componentPath)
+                    }
+            
+                    const permission = []
+                    if (item.child && item.child.length > 0) {
+                        child = formatRoutes(item.child)
+                        item.child.forEach(cItem =>{
+                            let path = cItem.name
+                            let pathItem = path.split('/')
+                            let auth = pathItem[pathItem.length - 1]
+                            permission.push(auth)
+                        })
+                    } else {
+                        child = []
+                    }
+            
+                    const route = {
+                        path : item.name,
+                        componet : componet,
+                        children : child,
+                        meta : {
+                            permission : permission,
+                            name : item.title
+                        }
+                    }
+                    appRoutes.push(route)
+                })
+            }
+            formatRoutes(state.navList)
+            resolve(appRoutes)
+        })
     }
 }
+
+
+
+
 
 export default {
     namespaced: true,

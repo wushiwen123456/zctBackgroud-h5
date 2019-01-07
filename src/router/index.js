@@ -9,24 +9,33 @@ import staticRoute from './staticRoute'
 import whiteList from './whiteList'
 
 var permissionList = []
+var routeInit = false
 
 function initRoute(router){
+    
     return new Promise((resolve) => {
-        if(permissionList.length == 0){
+        if(!routeInit){
             console.log("没有权限数据，正在获取")
             store.dispatch('auth/getMenuList').then(() => {
-                store.dispatch('auth/getPermissionList').then((res) => {
+                store.dispatch('auth/updateAppRoute').then((res) => {
                     console.log("权限列表生成完毕")
-                    permissionList = res
-                    res.forEach(function(v){
-                        let routeItem = router.match(v.name)
-                        if(routeItem){
-                            routeItem.meta.permission = v.permission ? v.permission : []
-                            routeItem.meta.name = v.name
-                        }
-                    })
+                    res.push({path: '*',redirect: '/error/404'})
+                    router.addRoutes(res)
+                    routeInit = true
                     resolve()
                 })
+                // store.dispatch('auth/getPermissionList').then((res) => {
+                //     console.log("权限列表生成完毕")
+                //     permissionList = res
+                //     res.forEach(function(v){
+                //         let routeItem = router.match(v.name)
+                //         if(routeItem){
+                //             routeItem.meta.permission = v.permission ? v.permission : []
+                //             routeItem.meta.name = v.name
+                //         }
+                //     })
+                //     resolve()
+                // })
             })
         } else{
             console.log("已有权限数据")

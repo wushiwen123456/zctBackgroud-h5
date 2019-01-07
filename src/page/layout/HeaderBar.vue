@@ -126,7 +126,8 @@ export default {
         },
         logout() {
             this.sysLogout().then(() => {
-                this.$router.push('/login')
+                location.reload()
+                //this.$router.push('/login')
             })
         },
         editPawSubmit(){
