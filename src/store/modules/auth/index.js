@@ -132,10 +132,10 @@ const actions = {
                     if (item.level == 1)
                         componet = Home
                     else {
-                        let path = item.name
-                        let pathItem = path.split('/')
-                        let cName = pathItem[pathItem.length - 1]
-                        let componentPath = "src/page/" + cName
+                         let path = item.name
+                        // let pathItem = path.split('/')
+                        // let cName = pathItem[pathItem.length - 1]
+                        let componentPath = "src/page/" + path
                         componet = () => require(componentPath)
                     }
             

@@ -36,14 +36,25 @@ const staticRoute = [
         component: () => import(/* webpackChunkName: 'login' */ '../page/login1')
     },
     {
+        // path: '/home',
+        // component: Layout,
+        // children: [
+        //     {
+        //         path: '',
+        //         component: () => import(/* webpackChunkName: 'home' */ '../page/home'),
+        //     }
+        // ]
         path: '/home',
-        component: Layout,
-        children: [
-            {
-                path: '',
-                component: () => import(/* webpackChunkName: 'home' */ '../page/home'),
-            }
-        ]
+        //component: () => import('@/page/dashboard/index')
+        component: () => import('@/page/auth/rule')
+        // children: [
+        //     {
+        //       path: '',
+        //       component: () => import('@/page/dashboard/index'),
+        //       name: 'Dashboard',
+        //       meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+        //     }
+        // ]
     }
     // {
     //     path: '/components',
