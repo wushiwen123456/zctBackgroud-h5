@@ -1,8 +1,12 @@
 import Cookies from 'js-cookie'
 import userAction from '@/api/login'
 import Auth from '@/util/auth'
-import router from '../../../router';
+import router from '../../../router'
 import Home from '@/page/layout'
+//import AuthPage from '@/page/auth/complexTable'
+
+
+
 
 const state = {
     token: '',
@@ -123,29 +127,35 @@ const actions = {
     // 将菜单列表扁平化形成权限列表
     updateAppRoute({state}){
         return new Promise((resolve) =>{
-            const appRoutes = []
-            // 将菜单数据扁平化为一级
-            function formatRoutes(menu){
-                const menuList = menu
-                menuList.forEach(item => {
-                    let componet, child
-                    if (item.level == 1)
-                        componet = Home
-                    else {
-                         let path = item.name
-                        // let pathItem = path.split('/')
-                        // let cName = pathItem[pathItem.length - 1]
-                        let componentPath = "src/page/" + path
-                        componet = () => require(componentPath)
-                    }
             
+            function formatRoutes(menuList){
+
+                let appRoute = []
+                menuList.forEach( item => {
+                    let component, path, child
+                    if (item.level == 1) {
+                        component = Home
+                        item.name = '/' + item.name
+                        path = item.name
+                    }
+                        
+                    else {
+                        component = () => import("@/page" + item.name)
+                        let p = item.name
+                        let pos = p.indexOf('/')
+                        path = p.substring(pos + 1)
+                        // let pItem = p.split('/')
+                        // path = pItem[pItem.length - 1]
+                        item.name = '/' + item.name
+                    }
+                    
                     const permission = []
                     if (item.child && item.child.length > 0) {
                         child = formatRoutes(item.child)
                         item.child.forEach(cItem =>{
-                            let path = cItem.name
-                            let pathItem = path.split('/')
-                            let auth = pathItem[pathItem.length - 1]
+                            let p = cItem.name
+                            let pItem = p.split('/')
+                            let auth = pItem[pItem.length - 1]
                             permission.push(auth)
                         })
                     } else {
@@ -153,18 +163,22 @@ const actions = {
                     }
             
                     const route = {
-                        path : item.name,
-                        componet : componet,
+                        path : path,
+                        component : component,
                         children : child,
                         meta : {
                             permission : permission,
                             name : item.title
                         }
                     }
-                    appRoutes.push(route)
+                    appRoute.push(route)
                 })
+                return appRoute
             }
-            formatRoutes(state.navList)
+            let appRoutes = formatRoutes(state.navList)
+            console.log('=============================================')
+            console.log(appRoutes)
+            console.log('=============================================')
             resolve(appRoutes)
         })
     }

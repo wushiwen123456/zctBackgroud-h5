@@ -21,8 +21,9 @@ function initRoute(router){
                     console.log("权限列表生成完毕")
                     res.push({path: '*',redirect: '/error/404'})
                     router.addRoutes(res)
+                    let origin = routeInit
                     routeInit = true
-                    resolve()
+                    resolve(origin)
                 })
                 // store.dispatch('auth/getPermissionList').then((res) => {
                 //     console.log("权限列表生成完毕")
@@ -39,7 +40,7 @@ function initRoute(router){
             })
         } else{
             console.log("已有权限数据")
-            resolve()
+            resolve(true)
         }
     })
 }
@@ -58,6 +59,10 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
     // 开启进度条
     NProgress.start();
+    console.log('=============================================')
+    console.log(to.path + '\n')
+    console.log(to.redirectedFrom)
+    console.log('=============================================')
     
     // 判断用户是否处于登录状态
     // debugger
@@ -70,10 +75,14 @@ router.beforeEach((to, from, next) => {
             // 防止因重定向到error页面造成beforeEach死循环
             next()
         } else {
-            initRoute(router).then(() => {
+            initRoute(router).then( res => {
                 let isPermission = false
-                console.log("进入权限判断")
-                next()
+                console.log("进入权限判断 + " + res)
+                if (res) 
+                    next()
+                else {
+                    next({ path: to.path, query: { v: 'private' }})
+                }
                 // permissionList.forEach((v) => {
                 //     // 判断跳转的页面是否在权限列表中
                 //     if(v.path == to.fullPath){
