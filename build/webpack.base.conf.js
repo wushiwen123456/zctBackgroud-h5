@@ -4,6 +4,7 @@ const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const CircularDependencyPlugin = require('circular-dependency-plugin')
 
 function resolve(dir) {
     return path.join(__dirname, '..', dir)
@@ -96,5 +97,13 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin()
+        // new CircularDependencyPlugin({
+        //     // exclude detection of files based on a RegExp
+        //     exclude: /a\.js|node_modules/,
+        //     // add errors to webpack instead of warnings
+        //     failOnError: true,
+        //     // set the current working directory for displaying module paths
+        //     cwd: process.cwd(),
+        //   })
     ]
 }

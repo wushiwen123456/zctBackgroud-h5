@@ -32,7 +32,8 @@ module.exports = merge(baseWebpackConfig, {
             filename: 'index.html',
             template: './src/index.html',
             favicon: './favicon.ico',
-            inject: true
+            inject: true,
+            chunksSortMode: 'none'
         }),
         new FriendlyErrorsPlugin()
     ]

@@ -1,9 +1,8 @@
 import Cookies from 'js-cookie'
-import userAction from '@/api/login'
 import Auth from '@/util/auth'
 import router from '../../../router'
 import Home from '@/page/layout'
-//import AuthPage from '@/page/auth/complexTable'
+import { login, refreshToken, getMenuTreeList} from '@/api/index'
 
 
 
@@ -35,7 +34,7 @@ const actions = {
     login({ commit }, userInfo) {
         return new Promise((resolve) => {
             
-            userAction.login(userInfo)
+            login(userInfo)
             .then(res => {
                 if(res){
                     commit('setToken', res.data)
@@ -81,7 +80,7 @@ const actions = {
     // 获取新Token
     refreshToken({dispatch, commit, state}){
         return new Promise((resolve) => {
-            userAction.refreshToken(state.token)
+            refreshToken(state.token)
             .then((res) =>{
                 if (res.code == 200){
                     commit('setToken', res.data)
@@ -95,9 +94,9 @@ const actions = {
     },
 
     // 获取该用户的菜单列表
-    getMenuList({commit}){
+    getMenuTreeList({commit}){
         return new Promise((resolve) =>{
-            userAction.getMenuList()
+            getMenuTreeList()
             .then((res) => {
                 commit("setMenuList", res.data)
                 resolve(res.data)
@@ -137,9 +136,7 @@ const actions = {
                         component = Home
                         item.name = '/' + item.name
                         path = item.name
-                    }
-                        
-                    else {
+                    } else {
                         component = () => import("@/page" + item.name)
                         let p = item.name
                         let pos = p.indexOf('/')
@@ -152,12 +149,19 @@ const actions = {
                     const permission = []
                     if (item.child && item.child.length > 0) {
                         child = formatRoutes(item.child)
-                        item.child.forEach(cItem =>{
-                            let p = cItem.name
-                            let pItem = p.split('/')
-                            let auth = pItem[pItem.length - 1]
-                            permission.push(auth)
-                        })
+                        if (item.child[0].ismenu) {
+                            //菜单
+                            item.isChildMenu = 1
+                        } else {
+                            //按钮
+                            item.isChildMenu = 0
+                            item.child.forEach(cItem =>{
+                                let p = cItem.name
+                                let pItem = p.split('/')
+                                let auth = pItem[pItem.length - 1]
+                                permission.push(auth)
+                            })
+                        }
                     } else {
                         child = []
                     }

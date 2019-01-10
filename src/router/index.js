@@ -16,7 +16,7 @@ function initRoute(router){
     return new Promise((resolve) => {
         if(!routeInit){
             console.log("没有权限数据，正在获取")
-            store.dispatch('auth/getMenuList').then(() => {
+            store.dispatch('auth/getMenuTreeList').then(() => {
                 store.dispatch('auth/updateAppRoute').then((res) => {
                     console.log("权限列表生成完毕")
                     res.push({path: '*',redirect: '/error/404'})

@@ -106,7 +106,8 @@ const webpackConfig = merge(baseWebpackConfig, {
             inject: true,
             minify: false,
             // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-            chunksSortMode: 'dependency',
+            //chunksSortMode: 'dependency',
+            chunksSortMode: 'none',
             excludeChunks: ['theme-default', 'theme-dark']
         }),
         // keep module.id stable when vender modules does not change

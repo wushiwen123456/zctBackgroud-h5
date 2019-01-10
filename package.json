@@ -79,7 +79,8 @@
     "webpack-hot-middleware": "^2.22.2",
     "webpack-merge": "^4.1.0",
     "svg-sprite-loader": "3.8.0",
-    "svgo": "1.0.5"
+    "svgo": "1.0.5",
+    "circular-dependency-plugin": "5.0.2"
   },
   "engines": {
     "node": ">= 8.9.0",

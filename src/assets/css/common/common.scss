@@ -15,6 +15,7 @@
 }
 .sys-content{
     position: absolute;
+    overflow: hidden;
     top: $headerHeight;
     right: 0;
     bottom: 0;

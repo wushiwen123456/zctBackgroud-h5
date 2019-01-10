@@ -1,5 +1,5 @@
 <template>
-    <el-submenu v-if="item.child && item.child.length && item.level == 1" :index="navIndex"> 
+    <el-submenu v-if="item.child && item.child.length && item.isChildMenu == 1" :index="navIndex"> 
         <!-- 创建父级菜单 -->
         <template slot="title"><i v-if="item.icon" class="item.icon"></i>{{ item.title }}</template>
         <!-- 创建子菜单 -->

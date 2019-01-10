@@ -21,5 +21,15 @@
 //全局样式
 .app-container {
     padding: 20px;
+    overflow: auto;
+    height: 100%;
+}
+.filter-container {
+  padding-bottom: 10px;
+  .filter-item {
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 10px;
   }
+}
   
