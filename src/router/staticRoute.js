@@ -32,10 +32,6 @@ const staticRoute = [
         component: () => import(/* webpackChunkName: 'login' */ '../page/login')
     },
     {
-        path: '/login1',
-        component: () => import(/* webpackChunkName: 'login' */ '../page/login1')
-    },
-    {
         path: '/home',
         component: Layout,
         // children: [
@@ -51,7 +47,7 @@ const staticRoute = [
               //component: () => import('@/page/auth/rule'),
               component: () => import('@/page/dashboard/index'),
               name: 'Dashboard',
-              meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+              meta: { name: 'dashboard', icon: 'dashboard', noCache: true }
             }
         ]
     }

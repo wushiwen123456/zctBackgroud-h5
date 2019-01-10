@@ -1,129 +1,183 @@
 <template>
-    <div class="sys-login">
-        <div class="login-area">
-            <div class="logo">
-                <img src="~sysStatic/images/logo.png" alt="">
-            </div>
-            <div class="form-group">
-                <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left" label-width="0px">
-                    <el-form-item prop="name">
-                        <el-input v-model="loginForm.name" type="text" :placeholder="$t('global.username')"></el-input>
-                    </el-form-item>
-                    <el-form-item prop="password">
-                        <el-input v-model="loginForm.password" type="password" :placeholder="$t('global.password')"></el-input>
-                    </el-form-item>
-                    <el-form-item prop="captcha" v-if="captcha.show" class="captcha">
-                        <img :src="captcha.src" alt="">
-                        <el-input v-model="loginForm.captcha" type="text" :placeholder="$t('global.captcha')"></el-input>
-                    </el-form-item>
-                    <p class="textR">{{$t('global.forgetPassword')}}</p>
-                    <a class="btn-login" type="primary" @click="submitForm()">{{$t('global.login')}}</a>
-                </el-form>
-                <div v-if="sysMsg" class="err-msg">{{sysMsg}}</div>
-            </div>
-            <div class="lang-toggle">
-                <span :class="{cur: lang=='zhCN'}" @click="changeLang('zhCN')">中</span> | 
-                <span :class="{cur: lang=='en'}" @click="changeLang('en')">En</span>
-            </div>
-            <div class="lang-toggle">
-                <span :class="{cur: theme=='theme-default'}" @click="changeTheme('theme-default')">浅</span> | 
-                <span :class="{cur: theme=='theme-dark'}" @click="changeTheme('theme-dark')">深</span>
-            </div>
-            <div class="tip">
-                <p>{{$t('global.loginTip')}}</p>
-            </div>
-        </div>
-    </div>
+  <div class="login-container">
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+      <h3 class="title">Coincobo 数字资产后台管理系统</h3>
+      <el-form-item prop="username">
+        <span class="svg-container">
+          <svg-icon icon-class="user" />
+        </span>
+        <el-input v-model="loginForm.username" name="username" type="text" auto-complete="on" placeholder="用户名" />
+      </el-form-item>
+      <el-form-item prop="password">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input
+          :type="pwdType"
+          v-model="loginForm.password"
+          name="password"
+          auto-complete="on"
+          placeholder="密码"
+          @keyup.enter.native="handleLogin" />
+        <span class="show-pwd" @click="showPwd">
+          <svg-icon icon-class="eye" />
+        </span>
+      </el-form-item>
+      <el-form-item>
+        <el-button :loading="loading" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
+          登 录
+        </el-button>
+      </el-form-item>
+      <div v-if="sysMsg" class="err-msg">{{sysMsg}}</div>
+    </el-form>
+  </div>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
-import setTheme from "@/util/setTheme"
-
+//import { isvalidUsername } from '@/utils/validate'
+import { mapActions } from 'vuex'
 export default {
-    data() {
-        return {
-            loginForm: {
-                name: '',
-                password: '',
-                captcha: ''
-            },
-            loginRules: {
-                name: [
-                    {required: true, message: '', trigger: 'blur'}
-                ],
-                password :[
-                    {required: true, message: '', trigger: 'blur'}
-                ],
-                captcha: [
-                    {required: false, message: '', trigger: 'blur'}
-                ]
-            },
-            captcha: {
-                show: false,
-                src: ''
-            },
-            sysMsg: ''
-        }
-    },
-    computed: {
-        ...mapState({
-            lang: state => state.lang,
-            theme: state => state.theme
-        })
-    },
-    watch: {
-        "captcha.show"(val){
-            this.loginRules.captcha[0].required = val
-        }
-    },
-    beforeMount(){
-        // 初始化错误信息。保证单独点击input时可以弹出正确的错误提示
-        this.setErrMsg()
-    },
-    methods: {
-        ...mapActions({
-            login: 'auth/login',
-            loadLang: 'loadLang'
-        }),
-        submitForm(){
-            this.$refs.loginForm.validate((valid) => {
-                if (valid) {
-                    this.login({
-                        name: this.loginForm.name,
-                        password: this.loginForm.password
-                    }).then(res => {
-                        if(res.login){
-                            this.$router.push('home')
-                        } else {
-                            this.sysMsg = res.message
-                            this.captcha.show = true
-                            this.captcha.src = res.captcha
-                        }
-                    })
-                } else {
-                    return false
-                }
-            });
-        },
-        changeLang(val){
-            if(val == this.lang) return
-            // 切换语言后重新加载语言包，并对重置登陆表单
-            this.loadLang(val).then(() => {
-                this.setErrMsg()
-                this.$refs.loginForm.resetFields()
-            })
-        },
-        changeTheme(val){
-            if(val == this.lang) return
-            setTheme(val)
-            this.$store.commit("setThemeColor", val)
-        },
-        setErrMsg(){
-            this.loginRules.name[0].message = this.$t('global.errMsg.inputRequired', {cont: this.$t('global.username')})
-            this.loginRules.password[0].message = this.$t('global.errMsg.inputRequired', {cont: this.$t('global.password')})
-            this.loginRules.captcha[0].message = this.$t('global.errMsg.inputRequired', {cont: this.$t('global.captcha')})
-        }
+  name: 'Login',
+  data() {
+    return {
+      loginForm: {
+        username: '',
+        password: ''
+      },
+      loginRules: {
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入用密码', trigger: 'blur'}]
+      },
+      loading: false,
+      pwdType: 'password',
+      sysMsg: ''
     }
+  },
+  methods: {
+    ...mapActions({
+            login: 'auth/login'
+        }),
+    showPwd() {
+      if (this.pwdType === 'password') {
+        this.pwdType = ''
+      } else {
+        this.pwdType = 'password'
+      }
+    },
+    handleLogin() {
+
+      this.$refs.loginForm.validate(valid => {
+        this.sysMsg = '';
+        if (valid) {
+          this.loading = true
+          
+          this.login(this.loginForm).then((res) => {
+            this.loading = false
+            if (res.code == 200) {
+              this.$router.push('home')
+            } else {
+              this.sysMsg = res.error;
+            }
+          }).catch(() => {
+            this.loading = false
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    }
+  }
 }
 </script>
+
+<style rel="stylesheet/scss" lang="scss">
+$bg:#2d3a4b;
+$light_gray:#eee;
+.err-msg{
+        color: #f56c6c;
+    }
+/* reset element-ui css */
+.login-container {
+  .el-input {
+    display: inline-block;
+    height: 47px;
+    width: 85%;
+    input {
+      background: transparent;
+      border: 0px;
+      -webkit-appearance: none;
+      border-radius: 0px;
+      padding: 12px 5px 12px 15px;
+      color: $light_gray;
+      height: 47px;
+      &:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0px 1000px $bg inset !important;
+        -webkit-text-fill-color: #fff !important;
+      }
+    }
+  }
+  .el-form-item {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    color: #454545;
+  }
+}
+
+</style>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+$bg:#2d3a4b;
+$dark_gray:#889aa4;
+$light_gray:#eee;
+.login-container {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  background-color: $bg;
+  .login-form {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 520px;
+    max-width: 100%;
+    padding: 35px 35px 15px 35px;
+    margin: 120px auto;
+  }
+  .tips {
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 10px;
+    span {
+      &:first-of-type {
+        margin-right: 16px;
+      }
+    }
+  }
+  .svg-container {
+    padding: 6px 5px 6px 15px;
+    color: $dark_gray;
+    vertical-align: middle;
+    width: 30px;
+    display: inline-block;
+  }
+  .title {
+    font-size: 26px;
+    font-weight: 400;
+    color: $light_gray;
+    margin: 0px auto 40px auto;
+    text-align: center;
+    font-weight: bold;
+  }
+  .show-pwd {
+    position: absolute;
+    right: 10px;
+    top: 7px;
+    font-size: 16px;
+    color: $dark_gray;
+    cursor: pointer;
+    user-select: none;
+  }
+}
+</style>
