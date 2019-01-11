@@ -18,41 +18,52 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="标题" min-width="150px">
+      <el-table-column label="用户编号" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.title }}</span>
+          <span>{{ scope.row.serial }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="名称" min-width="150px">
+      <el-table-column label="用户手机号" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.pathname }}</span>
+          <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="路由" min-width="150px">
+      <el-table-column label="用户昵称" align="center" min-width="150px">
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.name }}</el-tag>
+          <el-tag>{{ scope.row.nickname }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="权重" width="110px" align="center">
+      <el-table-column label="用户头像" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.weigh }}</span>
+          <span>{{ scope.row.head }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="110px" align="center">
+      <el-table-column label="邀请人手机号" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.inviter_phone }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="注册时间" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.create_time | parseTime() }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="最后一次登录时间" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.last_login_time | parseTime() }}</span>
+        </template>
+      </el-table-column>
+      
+      <el-table-column label="用户状态" width="110px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.status | statusFilter }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="菜单" width="80px">
-        <template slot-scope="scope">
-          <span>{{ scope.row.ismenu | isMenu }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>          
-          <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row,'deleted')">删除</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">详情</el-button>          
+          <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row,'deleted')">冻结</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -104,7 +115,7 @@
 </template>
 
 <script>
-import { getMenuList } from '@/api/index'
+import { getUserList } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -123,7 +134,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'ComplexTable1',
+  name: 'UserList',
   components: { Pagination },
   directives: { waves },
   filters: {
@@ -139,6 +150,9 @@ export default {
     },
     typeFilter(type) {
       return calendarTypeKeyValue[type]
+    },
+    parseTime(timestamp, format = '{y}-{m}-{d} {h}:{i}'){
+      return parseTime(timestamp, format)
     }
   },
   data() {
@@ -186,15 +200,15 @@ export default {
     }
   },
   created() {
-    this.getAuthList()
+    this.getUserList()
   },
   methods: {
-    getAuthList(){
+    getUserList(){
       let that = this
       this.listLoading = true
-      getMenuList().then(response => {
-        this.list = response.data
-        //this.total = response.data.total
+      getUserList().then(response => {
+        this.list = response.data.userList
+        this.total = response.data.count
         this.listLoading = false
       })
     },

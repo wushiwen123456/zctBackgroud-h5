@@ -4,6 +4,7 @@ function random(n) {
   if (n > 21) return null
   return parseInt((Math.random() + 1) * Math.pow(10,n-1))
 }
+
 export function login(userinfo) {
   var arr = new Array()
   arr.push(new Date().getTime())
@@ -17,21 +18,31 @@ export function login(userinfo) {
     }
   })
 }
+
 export function refreshToken(token) {
   return request({
       url: '/admin/index/refreshToken/' + token,
       method: 'get'
   })
 }
+
 export function getMenuTreeList(){
   return request({
     url: '/admin/index/getMenuTreeList',
     methods: 'get'
   });
 }
+
 export function getMenuList(){
   return request({
     url: '/admin/index/getMenuList',
+    methods: 'get'
+  });
+}
+
+export function getUserList(pageSize = 0){
+  return request({
+    url: '/admin/user/index/' + pageSize,
     methods: 'get'
   });
 }

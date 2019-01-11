@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div class="app-container nopad">
     <component :is="currentRole"/>
   </div>
 </template>
