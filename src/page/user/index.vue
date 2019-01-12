@@ -30,7 +30,6 @@
       </el-table-column>
       <el-table-column label="用户昵称" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
           <el-tag>{{ scope.row.nickname }}</el-tag>
         </template>
       </el-table-column>
@@ -57,7 +56,7 @@
       
       <el-table-column label="用户状态" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.status | statusFilter }}</span>
+          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
@@ -68,7 +67,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getUserList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
@@ -138,8 +137,22 @@ export default {
   components: { Pagination },
   directives: { waves },
   filters: {
-    statusFilter() {
-      return '正常'
+    
+    statusFilter(status, type) {
+      if (type == 0) {
+        const statusMap = {
+            1: 'success',
+            2: 'danger'
+          }
+        return statusMap[status]
+      } else {
+        const statusMap = {
+            1: '正常',
+            2: '冻结'
+          }
+        return statusMap[status]
+      }
+      
     },
     isMenu(ismenu) {
       const menuMap = {
@@ -151,8 +164,8 @@ export default {
     typeFilter(type) {
       return calendarTypeKeyValue[type]
     },
-    parseTime(timestamp, format = '{y}-{m}-{d} {h}:{i}'){
-      return parseTime(timestamp, format)
+    parseTime(timestamp){
+      return parseTime(timestamp)
     }
   },
   data() {
