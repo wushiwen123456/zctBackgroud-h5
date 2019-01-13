@@ -62,7 +62,7 @@
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">详情</el-button>          
-          <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row,'deleted')">冻结</el-button>
+          <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -114,7 +114,7 @@
 </template>
 
 <script>
-import { getUserList } from '@/api/index'
+import { getUserList, modifyUserStatus } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -153,6 +153,13 @@ export default {
         return statusMap[status]
       }
       
+    },
+    statusOpFilter(status) {
+      const statusMap = {
+            1: '冻结',
+            2: '恢复'
+          }
+      return statusMap[status]
     },
     isMenu(ismenu) {
       const menuMap = {
@@ -229,12 +236,37 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作成功',
-        type: 'success'
-      })
-      row.status = status
+    handleModifyStatus(row) {
+
+      let title = ''
+      if (row.status == 1)
+        title = '当前操作将会冻结该用户，是否继续？'
+      else 
+        title = '当前操作将会恢复该用户，是否继续？'
+
+      this.$confirm(title, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          center: true
+        }).then(() => {
+          modifyUserStatus(row.id).then(res => {
+          if (res.code == 200) {
+              this.$message({
+                message: res.data.desc,
+                type: 'success'
+              })
+              row.status = res.data.status
+            } else {
+              this.$message({
+                message: res.error,
+                type: 'warn'
+              })
+            }
+          })
+          
+        }).catch(() => {
+        });
     },
     sortChange(data) {
       const { prop, order } = data

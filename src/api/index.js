@@ -47,6 +47,13 @@ export function getUserList(pageSize = 0){
   });
 }
 
+export function modifyUserStatus(userId){
+  return request({
+    url: '/admin/user/disabled/' + userId,
+    methods: 'get'
+  });
+}
+
 // export function getInfo(token) {
 //   return request({
 //     url: '/user/info',
