@@ -29,28 +29,44 @@ export function refreshToken(token) {
 export function getMenuTreeList(){
   return request({
     url: '/admin/index/getMenuTreeList',
-    methods: 'get'
+    method: 'get'
   });
 }
 
 export function getMenuList(){
   return request({
     url: '/admin/index/getMenuList',
-    methods: 'get'
+    method: 'get'
   });
 }
 
-export function getUserList(pageSize = 0){
+export function getUserList(query){
   return request({
-    url: '/admin/user/index/' + pageSize,
-    methods: 'get'
+    url: '/admin/user/index/' + query.page,
+    method: 'post',
+    data: query
   });
 }
 
 export function modifyUserStatus(userId){
   return request({
     url: '/admin/user/disabled/' + userId,
-    methods: 'get'
+    method: 'get'
+  });
+}
+
+export function getCoinList(){
+  return request({
+    url: '/admin/coin/index',
+    method: 'get'
+  });
+}
+
+export function updateCoinInfo(temp){
+  return request({
+    url: '/admin/coin/update',
+    method: 'post',
+    data: temp
   });
 }
 
