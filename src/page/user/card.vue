@@ -1,7 +1,14 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
+      <el-input placeholder="会员姓名" v-model="listQuery.name" style="width: 150px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
+      <el-select @change="selectedChange" v-model="listQuery.type" placeholder="审核状态" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in realnameTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+      </el-select>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
     </div>
+
     <el-table
       v-loading="listLoading"
       :key="tableKey"
@@ -16,108 +23,96 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="币种名称" align="center" min-width="150px">
+      <el-table-column label="用户姓名" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.symbol }}</span>
+          <span>{{ scope.row.realname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="冲币地址" align="center" min-width="150px">
+      <el-table-column label="身份证号码" align="center" min-width="150px">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.deposit_addr }}</el-tag>
+          <span>{{ scope.row.id_number }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最低提币限额" width="110px" align="center">
+      <el-table-column label="用户手机号" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.withdraw_minimum }}</span>
+          <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最大提币限额" min-width="150px" align="center">
+      <el-table-column label="正面照片" align="center" min-width="180px">
         <template slot-scope="scope">
-          <span>{{ scope.row.withdraw_maxmum }}</span>
+          <img class="card-img" :src="cardImg(scope.row.id_card_front)" />
         </template>
       </el-table-column>
-      <el-table-column label="提币手续费" min-width="150px" align="center">
+      <el-table-column label="反面照片" align="center" min-width="180px">
         <template slot-scope="scope">
-          <span>{{ scope.row.withdraw_fee }}</span>
+          <img class="card-img" :src="cardImg(scope.row.id_card_back)" />
         </template>
       </el-table-column>
-      <el-table-column label="提币实名认证限额" min-width="150px" align="center">
+      <el-table-column label="手持照片" align="center" min-width="180px">
         <template slot-scope="scope">
-          <span>{{ scope.row.certificate_threshold}}</span>
+          <img class="card-img" :src="cardImg(scope.row.id_card_in_hand)" />
         </template>
       </el-table-column>
-      <el-table-column label="转换手续费" min-width="100px" align="center">
+      <el-table-column label="认证时间" min-width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.trans_fee}}</span>
+          <span>{{ scope.row.create_time | parseTime() }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最低托管限额" min-width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.trustee_minimum }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="托管手续费" min-width="100px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.trustee_fee }}</span>
-        </template>
-      </el-table-column>
-      
-      <el-table-column label="修改时间" width="110px" align="center">
+      <el-table-column label="审核时间" min-width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.update_time | parseTime() }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="认证状态" width="110px" align="center">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="审核描述" width="110px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.remark }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">查看&修改</el-button>          
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">审核</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" v-bind:style="{height:fullHeight}" customClass="customWH">
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getCardList" />
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" customClass="customWH">
       <el-scrollbar style="height:100%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
-        <el-form-item label="币种名称" prop="symbol">
-          <el-input v-model="temp.symbol" :disabled="true"/>
+        <el-form-item label="用户姓名">
+          <el-input :disabled="true" v-model="temp.realname"/>
         </el-form-item>
-        <el-form-item label="冲币地址" prop="deposit_addr">
-          <el-input type="textarea" v-model="temp.deposit_addr" width="300px" placeholder="请设置冲币地址"/>
+        <el-form-item label="身份证号">
+          <el-input :disabled="true" v-model="temp.id_number"/>
         </el-form-item>
-        <el-form-item label="冲币须知" prop="deposit_notice">
-          <el-input v-model="temp.deposit_notice" type="textarea" :rows="6" placeholder="请输入冲币须知"/>
+        <el-form-item label="用户手机号">
+          <el-input :disabled="true" v-model="temp.phone"/>
         </el-form-item>
-        <el-form-item label="最小提币数量" prop="withdraw_minimum">
-          <el-input v-model="temp.withdraw_minimum" placeholder="请设置最小提币数量"/>
+        <el-form-item label="正面照片">
+          <img class="card-img-big" :src="cardImg(temp.id_card_front)" />
         </el-form-item>
-        <el-form-item label="最大提币数量" prop="withdraw_maxmum">
-          <el-input v-model="temp.withdraw_maxmum" placeholder="请设置最大提币数量"/>
+        <el-form-item label="反面照片">
+          <img class="card-img-big" :src="cardImg(temp.id_card_back)" />
         </el-form-item>
-        <el-form-item label="提币须知" prop="withdraw_notice">
-          <el-input v-model="temp.withdraw_notice" type="textarea" :rows="6" placeholder="请输入提币须知"/>
+        <el-form-item label="手持照片">
+          <img class="card-img-big" :src="cardImg(temp.id_card_in_hand)" />
         </el-form-item>
-        <el-form-item label="提币手续费" prop="withdraw_fee">
-          <el-input v-model="temp.withdraw_fee" :disabled="true" placeholder="请设置提币手续费"/>
+        <el-form-item label="认证状态">
+          <span>{{ temp.status | statusFilter(1) }}</span>
         </el-form-item>
-        <el-form-item label="提币实名认证限额" prop="certificate_threshold">
-          <el-input v-model="temp.certificate_threshold" placeholder="请设置提币实名认证限额"/>
+        <el-form-item v-if="temp.status != 'success'" label="审核操作" prop="type">
+          <el-select @change="checkedChange" v-model="temp.type"  style="width: 180px">
+            <el-option v-for="item in checkOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+          </el-select>
         </el-form-item>
-        <el-form-item label="转换手续费(个)" prop="trans_fee">
-          <el-input v-model="temp.trans_fee" placeholder="请设置转换手续费"/>
-        </el-form-item>
-        <el-form-item label="转换须知" prop="trans_notice">
-          <el-input v-model="temp.trans_notice" type="textarea" :rows="6" placeholder="请输入转换须知"/>
-        </el-form-item>
-        <el-form-item label="托管数量(个)" prop="trustee_minimum">
-          <el-input v-model="temp.trustee_minimum" placeholder="请设置最小托管数量"/>
-        </el-form-item>
-        <el-form-item label="托管费用(个)" prop="trustee_fee">
-          <el-input v-model="temp.trustee_fee" placeholder="请设置托管费用"/>
-        </el-form-item>
-        <el-form-item label="托管须知" prop="trustee_notice">
-          <el-input v-model="temp.trustee_notice" type="textarea" :rows="6" placeholder="请输入托管须知"/>
-        </el-form-item>
-        <el-form-item label="币种介绍" prop="profile">
-          <tinymce :height="300" v-model="temp.profile"/>
+        <el-form-item v-if="reason" prop="remark" label="审核拒绝原因">
+          <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.remark" type="textarea" placeholder="请填写审核不通过的原因"/>
         </el-form-item>
       </el-form>
       </el-scrollbar>
@@ -127,27 +122,43 @@
       </div>
     </el-dialog>
 
+    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
+      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
+        <el-table-column prop="key" label="Channel"/>
+        <el-table-column prop="pv" label="Pv"/>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
-
 <style>
-.customWH {
-  margin-top: 5vh!important;
-  width: 60%;
-  height: 90%;
-}
-.el-dialog__body{
-  height:75%;
-  padding: 15px 20px
-}
+  .card-img{
+    width: 160px;
+    height: 90px;
+  }
+  .card-img-big{
+    width: 320px;
+    height: 180px;
+  }
+  .customWH {
+    margin-top: 5vh!important;
+    width: 60%;
+    height: 90%;
+  }
+  .el-dialog__body{
+    height:75%;
+    padding: 15px 20px
+  }
 </style>
 
 <script>
-import { getCoinList, updateCoinInfo } from '@/api/index'
+import { getCardList, verifyUserCard } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-import Tinymce from '@/components/Tinymce'
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -162,28 +173,23 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
   return acc
 }, {})
 
+const realnameTypeOptions = [
+  { key: 'pend', display_name: '未审核' },
+  { key: 'success', display_name: '审核成功' },
+  { key: 'fail', display_name: '审核失败' }
+]
+
+const checkOptions = [
+  { key: 'success', display_name: '审核成功' },
+  { key: 'fail', display_name: '审核失败' }
+]
+
 export default {
-  name: 'CoinList',
-  components: { Pagination, Tinymce },
+  name: 'UserList',
+  components: { Pagination },
   directives: { waves },
   filters: {
     
-    statusFilter(status, type) {
-      if (type == 0) {
-        const statusMap = {
-            1: 'success',
-            2: 'danger'
-          }
-        return statusMap[status]
-      } else {
-        const statusMap = {
-            1: '正常',
-            2: '冻结'
-          }
-        return statusMap[status]
-      }
-      
-    },
     statusOpFilter(status) {
       const statusMap = {
             1: '冻结',
@@ -191,18 +197,26 @@ export default {
           }
       return statusMap[status]
     },
-    isMenu(ismenu) {
-      const menuMap = {
-        1: '菜单',
-        0: '按钮'
+    statusFilter(status, type) {
+      if (type == 0) {
+        const statusMap = {
+          pend: 'info',
+          success: 'success',
+          fail: 'danger'
+          }
+        return statusMap[status]
+      } else {
+        const statusMap = {
+          pend: '未审核',
+          success: '审核成功',
+          fail: '审核失败'
+          }
+        return statusMap[status]
       }
-      return menuMap[ismenu]
-    },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
+      
     },
     parseTime(time, timestamp){
-      if (time == null) return null
+      if (time == null) return ''
       return parseTime(time, timestamp)
     }
   },
@@ -212,73 +226,71 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      fullHeight: document.documentElement.clientHeight + 'px',
       listQuery: {
         page: 1,
         pageSize: 20,
         phone: undefined,
-        inviterPhone: undefined
+        name: undefined,
+        type: undefined
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
+      realnameTypeOptions,
+      checkOptions,
+      reason: false,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
+      row: {},
       temp: {
         id: undefined,
-        symbol: '',
-        profile: '',
-        deposit_addr: '',
-        deposit_notice: '',
-        withdraw_minimum: '',
-        withdraw_maxmum: '',
-        withdraw_notice: '',
-        withdraw_fee: '',
-        certificate_threshold:'',
-        trans_minimum: '',
-        trans_notice: '',
-        trustee_minimum: '',
-        trustee_notice: ''
+        importance: 1,
+        remark: '',
+        timestamp: new Date(),
+        title: '',
+        type: 'success'
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '数字货币参数设置',
+        update: 'Edit',
         create: 'Create'
       },
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        deposit_addr: [{ required: true, message: '请设置充币地址', trigger: 'blur' }],
-        deposit_notice: [{ required: true, message: '请填写充币须知', trigger: 'blur' }],
-        withdraw_minimum: [{ required: true, message: '请设置提币最小数量', trigger: 'blur' }],
-        withdraw_maxmum: [{ required: true, message: '请设置提币最大数量', trigger: 'blur' }],
-        withdraw_notice: [{ required: true, message: '请填写提币须知', trigger: 'blur' }],
-        certificate_threshold: [{ required: true, message: '请设置提币实名限额', trigger: 'blur' }],
-        trans_fee: [{ required: true, message: '请设置转换手续费', trigger: 'blur' }],
-        trans_notice: [{ required: true, message: '请填写转换须知', trigger: 'blur' }],
-        trustee_minimum: [{ required: true, message: '请设置托管最小数量', trigger: 'blur' }],
-        trustee_fee: [{ required: true, message: '请设置托管费用', trigger: 'blur' }],
-        trustee_notice: [{ required: true, message: '请填写托管须知', trigger: 'blur' }],
-        profile: [{ required: true, message: '请填写币种介绍', trigger: 'blur' }]
+        type: [{ required: true, message: '请确认审核操作', trigger: 'change' }],
+        remark: [{ required: true, message: '请填写审核失败描述', trigger: 'blur' }]
       },
       downloadLoading: false
     }
   },
   created() {
-    this.getCoinList()
+    this.getCardList()
   },
   methods: {
-    getCoinList(){
+    selectedChange(){
+      this.handleFilter()
+    },
+    checkedChange(){
+      if (this.temp.type == 'fail')
+        this.reason = true
+      else
+        this.reason = false
+    },
+    getCardList(){
       this.listLoading = true
-      getCoinList().then(response => {
-        this.list = response.data
+      getCardList(this.listQuery).then(response => {
+        this.list = response.data.cardList
+        this.total = response.data.count
+        if (this.list.length == this.listQuery.limit)
+          this.listQuery.page++
         this.listLoading = false
       })
     },
     handleFilter() {
       this.listQuery.page = 1
-      this.getUserList()
+      this.getCardList()
     },
     handleModifyStatus(row) {
 
@@ -364,32 +376,61 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+      this.row = row
+      this.temp = Object.assign(this.temp, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
     updateData() {
+      if (this.temp.status == 'success') {
+        this.dialogFormVisible = false
+        return
+      }
+      let that = this
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          updateCoinInfo(this.temp).then((res) => {
-            if (res.code == 200) {
-              this.dialogFormVisible = false
+          let tmpData = {}
+          tmpData.id = this.temp.id
+          tmpData.type = this.temp.type
+          tmpData.remark = this.temp.remark
+
+          verifyUserCard(tmpData).then(res => {
+          if (res.code == 200) {
               this.$message({
-                message: '更新成功',
+                message: res.data.desc,
                 type: 'success'
               })
+              that.row.status = res.data.status
+              that.row.remark = res.data.remark
+              that.dialogFormVisible = false
             } else {
               this.$message({
                 message: res.error,
-                type: 'error'
+                type: 'warn'
               })
             }
-            
           })
+          // updateArticle(tempData).then(() => {
+          //   for (const v of this.list) {
+          //     if (v.id === this.temp.id) {
+          //       const index = this.list.indexOf(v)
+          //       this.list.splice(index, 1, this.temp)
+          //       break
+          //     }
+          //   }
+          //   this.dialogFormVisible = false
+          //   this.$notify({
+          //     title: '成功',
+          //     message: '更新成功',
+          //     type: 'success',
+          //     duration: 2000
+          //   })
+          // })
         }
       })
     },
@@ -432,7 +473,13 @@ export default {
         }
       }))
     }
+  },
+  computed:{
+    cardImg(){
+      return function(img){
+        return this.$static + 'uploads/' + img
+      }
+    }
   }
 }
 </script>
-

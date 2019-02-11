@@ -74,7 +74,7 @@ export default {
           this.login(this.loginForm).then((res) => {
             this.loading = false
             if (res.code == 200) {
-              this.$router.push('home')
+              this.$router.push('user/index')
             } else {
               this.sysMsg = res.error;
             }

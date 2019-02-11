@@ -38,6 +38,7 @@ const actions = {
             .then(res => {
                 if(res){
                     commit('setToken', res.data)
+                    commit('user/setName', userInfo.username, { root: true })
                 }
                 resolve(res)
             })

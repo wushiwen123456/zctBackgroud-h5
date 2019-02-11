@@ -18,6 +18,7 @@ import './icons' // icon
 
 // 注册组件到Vue
 Vue.prototype.$axios = axios
+Vue.prototype.$static = 'http://47.52.132.133:8080/'
 Vue.use(ElementUI, {
     i18n: (key, value) => i18n.t(key, value)
 })

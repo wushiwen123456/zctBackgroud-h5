@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
+      <el-input placeholder="会员名称" v-model="listQuery.username" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
       <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
       <el-input placeholder="邀请人手机号" v-model="listQuery.inviterPhone" style="width: 150px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
@@ -20,9 +21,9 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户编号" align="center" min-width="150px">
+      <el-table-column label="用户名" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.serial }}</span>
+          <el-tag>{{ scope.row.username }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="用户手机号" align="center" min-width="150px">
@@ -30,14 +31,10 @@
           <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户昵称" align="center" min-width="150px">
-        <template slot-scope="scope">
-          <el-tag>{{ scope.row.nickname }}</el-tag>
-        </template>
-      </el-table-column>
       <el-table-column label="用户头像" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.head }}</span>
+          <!-- <span>{{ scope.row.head }}</span> -->
+          <img class="user-head" :src="headImg(scope.row.head)" />
         </template>
       </el-table-column>
       <el-table-column label="邀请人手机号" min-width="150px" align="center">
@@ -63,7 +60,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">详情</el-button>          
+          <!-- <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">详情</el-button>           -->
           <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button>
         </template>
       </el-table-column>
@@ -114,6 +111,12 @@
 
   </div>
 </template>
+<style>
+  .user-head{
+    width:58px;
+    height: 58px;
+  }
+</style>
 
 <script>
 import { getUserList, modifyUserStatus } from '@/api/index'
@@ -139,7 +142,6 @@ export default {
   components: { Pagination },
   directives: { waves },
   filters: {
-    
     statusFilter(status, type) {
       if (type == 0) {
         const statusMap = {
@@ -154,7 +156,6 @@ export default {
           }
         return statusMap[status]
       }
-      
     },
     statusOpFilter(status) {
       const statusMap = {
@@ -174,6 +175,8 @@ export default {
       return calendarTypeKeyValue[type]
     },
     parseTime(time, timestamp){
+      if (time == null)
+        return ''
       return parseTime(time, timestamp)
     }
   },
@@ -186,6 +189,7 @@ export default {
       listQuery: {
         page: 1,
         pageSize: 20,
+        username: undefined,
         phone: undefined,
         inviterPhone: undefined
       },
@@ -392,6 +396,18 @@ export default {
         }
       }))
     }
+  },
+  computed: {
+    headImg() {
+      return function(head) {
+        //return this.$static + 'uploads/' + '20190121/567429d6137b7e075648b600a87dcfd2.jpg'
+          if (head == null || head == '')
+          return this.$static + 'uploads/' + 'default_head.png'
+          else 
+          return this.$static + 'uploads/' + head
+      }
+      
+    },
   }
 }
 </script>

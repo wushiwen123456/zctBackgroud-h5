@@ -67,14 +67,38 @@ export function updateCoinInfo(temp){
     url: '/admin/coin/update',
     method: 'post',
     data: temp
-  });
+  })
 }
 
 export function trusteeConfigs(){
   return request({
     url: '/admin/trustee/config',
     method: 'get'
-    });
+    })
+}
+
+export function updateTrusteeConfig(temp){
+  return request({
+    url: '/admin/trustee/update',
+    method: 'post',
+    data: temp
+  })
+}
+
+export function getCardList(query){
+  return request({
+    url: '/admin/user/userCards',
+    method: 'post',
+    data: query
+  });
+}
+
+export function verifyUserCard(data){
+  return request({
+    url: '/admin/user/verifyUserCard',
+    method: 'post',
+    data: data
+  });
 }
 
 // export function getInfo(token) {

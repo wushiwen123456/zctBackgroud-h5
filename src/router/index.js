@@ -69,8 +69,8 @@ router.beforeEach((to, from, next) => {
     if (Auth.isLogin()) {
         // 如果当前处于登录状态，并且跳转地址为login，则自动跳回系统首页
         // 这种情况出现在手动修改地址栏地址时
-        if (to.path === '/login1') {
-            next({path: "/home", replace: true})
+        if (to.path === '/login') {
+            next({path: "/user/index", replace: true})
         } else if(to.path.indexOf("/error") >= 0){
             // 防止因重定向到error页面造成beforeEach死循环
             next()

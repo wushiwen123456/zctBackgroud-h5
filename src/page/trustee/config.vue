@@ -1,9 +1,6 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
-      <el-input placeholder="邀请人手机号" v-model="listQuery.inviterPhone" style="width: 150px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
     </div>
 
     <el-table
@@ -25,14 +22,14 @@
           <span>{{ scope.row.symbol }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="日收益百分比(MIN)" align="center" min-width="150px">
+      <el-table-column label="日收益百分比(最小值)" align="center" width="180px">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.income_rate_min }}</el-tag>
+          <el-tag>{{ scope.row.income_rate_min }}%</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="日收益百分比(MAX)" width="150px" align="center">
+      <el-table-column label="日收益百分比(最大值)" width="180px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.income_rate_max }}</span>
+          <span>{{ scope.row.income_rate_max }}%</span>
         </template>
       </el-table-column>
       <el-table-column label="托管类型" min-width="150px" align="center">
@@ -53,53 +50,25 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">详情</el-button>          
-          <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">查看&修改</el-button>          
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" customClass="customWH">
-      <el-scrollbar style="height:600px">
+      <el-scrollbar style="height:100%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="width: 600px; margin-left:50px;">
-        <el-form-item :class="{hidden: true }">
-          <el-input v-model="temp.symbol" :disabled="true"/>
+        <el-form-item label="币种名称">
+          <el-input v-model="temp.symbol" disabled="true"/>
         </el-form-item>
-        <el-form-item label="币种名称" prop="symbol">
-          <el-input v-model="temp.symbol" :disabled="true"/>
+        <el-form-item label="日收益百分比最小值" prop="income_rate_min">
+          <el-input v-model="temp.income_rate_min" placeholder="请输入日收益百分比最小值"/>
         </el-form-item>
-        <el-form-item label="币种介绍" prop="profile">
-          <el-input type="textarea" :rows="6" v-model="temp.profile" placeholder="请输入币种介绍"/>
+        <el-form-item label="日收益百分比最大值" prop="income_rate_max">
+          <el-input v-model="temp.income_rate_max" placeholder="请输入日收益百分比最大值"/>
         </el-form-item>
-        <el-form-item label="冲币地址" prop="deposit_addr">
-          <el-input type="textarea" v-model="temp.deposit_addr" width="300px" placeholder="请设置冲币地址"/>
-        </el-form-item>
-        <el-form-item label="冲币须知" prop="deposit_notice">
-          <el-input v-model="temp.deposit_notice" type="textarea" :rows="6" placeholder="请输入冲币须知"/>
-        </el-form-item>
-        <el-form-item label="最小提币数量" prop="withdraw_minimum">
-          <el-input v-model="temp.withdraw_minimum" placeholder="请设置最小提币数量"/>
-        </el-form-item>
-        <el-form-item label="最大提币数量" prop="withdraw_maxmum">
-          <el-input v-model="temp.withdraw_maxmum" placeholder="请设置最大提币数量"/>
-        </el-form-item>
-        <el-form-item label="提币须知" prop="withdraw_notice">
-          <el-input v-model="temp.withdraw_notice" type="textarea" :rows="6" placeholder="请输入提币须知"/>
-        </el-form-item>
-        <el-form-item label="提币手续费" prop="withdraw_fee">
-          <el-input v-model="temp.withdraw_fee" placeholder="请设置提币手续费"/>
-        </el-form-item>
-        <el-form-item label="转换数量" prop="trans_minimum">
-          <el-input v-model="temp.trans_minimum" placeholder="请设置最小转换数量"/>
-        </el-form-item>
-        <el-form-item label="转换须知" prop="trans_notice">
-          <el-input v-model="temp.trans_notice" type="textarea" :rows="6" placeholder="请输入转换须知"/>
-        </el-form-item>
-        <el-form-item label="托管数量" prop="trustee_minimum">
-          <el-input v-model="temp.trustee_minimum" placeholder="请设置最小托管数量"/>
-        </el-form-item>
-        <el-form-item label="托管须知" prop="trustee_notice">
-          <el-input v-model="temp.trustee_notice" type="textarea" :rows="6" placeholder="请输入托管须知"/>
+        <el-form-item label="托管类型">
+          <el-input v-model="temp.type" disabled="true" placeholder="请输入冲币须知"/>
         </el-form-item>
       </el-form>
       </el-scrollbar>
@@ -114,13 +83,18 @@
 
 <style>
 .customWH {
-  margin-top: 10vh !important;
-  width: 50%;
+  margin-top: 5vh!important;
+  width: 60%;
+  height: 90%;
+}
+.el-dialog__body{
+  height:75%;
+  padding: 15px 20px
 }
 </style>
 
 <script>
-import { trusteeConfigs, updateCoinInfo } from '@/api/index'
+import { trusteeConfigs, updateTrusteeConfig } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -188,38 +162,21 @@ export default {
       temp: {
         id: undefined,
         symbol: '',
-        profile: '',
-        deposit_addr: '',
-        deposit_notice: '',
-        withdraw_minimum: '',
-        withdraw_maxmum: '',
-        withdraw_notice: '',
-        withdraw_fee: '',
-        trans_minimum: '',
-        trans_notice: '',
-        trustee_minimum: '',
-        trustee_notice: ''
+        income_rate_min: '',
+        income_rate_max: '',
+        type: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '数字货币参数设置',
+        update: '数字货币托管收益参数设置',
         create: 'Create'
       },
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        profile: [{ required: true, message: '请填写币种介绍', trigger: 'blur' }],
-        deposit_addr: [{ required: true, message: '请设置充币地址', trigger: 'blur' }],
-        deposit_notice: [{ required: true, message: '请填写充币须知', trigger: 'blur' }],
-        withdraw_minimum: [{ required: true, message: '请设置提币最小数量', trigger: 'blur' }],
-        withdraw_maxmum: [{ required: true, message: '请设置提币最大数量', trigger: 'blur' }],
-        withdraw_notice: [{ required: true, message: '请填写提币须知', trigger: 'blur' }],
-        withdraw_fee: [{ required: true, message: '请设置提币手续费', trigger: 'blur' }],
-        trans_minimum: [{ required: true, message: '请设置转换最小数量', trigger: 'blur' }],
-        trans_notice: [{ required: true, message: '请填写转换须知', trigger: 'blur' }],
-        trustee_minimum: [{ required: true, message: '请设置托管最小数量', trigger: 'blur' }],
-        trustee_notice: [{ required: true, message: '请填写托管须知', trigger: 'blur' }]
+        income_rate_min: [{ required: true, message: '请填写日收益百分比最小值', trigger: 'blur' }],
+        income_rate_max: [{ required: true, message: '请填写日收益百分比最大值', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -334,7 +291,7 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          updateCoinInfo(this.temp).then((res) => {
+          updateTrusteeConfig(this.temp).then((res) => {
             if (res.code == 200) {
               this.dialogFormVisible = false
               this.$message({
