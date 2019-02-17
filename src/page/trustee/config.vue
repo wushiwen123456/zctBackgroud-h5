@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
     </div>
-
+  <el-scrollbar>
     <el-table
       v-loading="listLoading"
       :key="tableKey"
@@ -10,7 +10,6 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column label="ID" prop="id" sortable="custom" align="center" width="65">
         <template slot-scope="scope">
@@ -54,7 +53,7 @@
         </template>
       </el-table-column>
     </el-table>
-
+</el-scrollbar>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" customClass="customWH">
       <el-scrollbar style="height:100%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="width: 600px; margin-left:50px;">
@@ -80,7 +79,6 @@
 
   </div>
 </template>
-
 <style>
 .customWH {
   margin-top: 5vh!important;

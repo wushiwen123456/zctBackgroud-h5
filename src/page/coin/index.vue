@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <el-scrollbar>
     <div class="filter-container">
     </div>
     <el-table
@@ -9,7 +10,6 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column label="ID" prop="id" sortable="custom" align="center" width="65">
         <template slot-scope="scope">
@@ -73,7 +73,7 @@
         </template>
       </el-table-column>
     </el-table>
-
+  </el-scrollbar>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" v-bind:style="{height:fullHeight}" customClass="customWH">
       <el-scrollbar style="height:100%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
@@ -139,6 +139,16 @@
 .el-dialog__body{
   height:75%;
   padding: 15px 20px
+}
+.el-table__body-wrapper{
+    width: auto;
+    display: inline-block;
+    vertical-align: bottom;
+}
+.el-table{
+  display: inline-block;
+  width: auto;
+  max-width: fit-content;
 }
 </style>
 

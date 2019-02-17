@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <el-scrollbar>
     <div class="filter-container">
       <el-input placeholder="会员姓名" v-model="listQuery.name" style="width: 150px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
@@ -16,7 +17,6 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column label="ID" prop="id" sortable="custom" align="center" width="65">
         <template slot-scope="scope">
@@ -79,7 +79,7 @@
         </template>
       </el-table-column>
     </el-table>
-
+    </el-scrollbar>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getCardList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" customClass="customWH">
@@ -142,6 +142,16 @@
   .card-img-big{
     width: 320px;
     height: 180px;
+  }
+  .el-table__body-wrapper{
+    width: auto;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  .el-table{
+    display: inline-block;
+    width: auto;
+    max-width: fit-content;
   }
   .customWH {
     margin-top: 5vh!important;

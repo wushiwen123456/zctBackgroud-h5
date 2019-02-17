@@ -1,12 +1,13 @@
 <template>
+
   <div class="app-container">
+    <el-scrollbar>
     <div class="filter-container">
       <el-input placeholder="会员名称" v-model="listQuery.username" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
       <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
       <el-input placeholder="邀请人手机号" v-model="listQuery.inviterPhone" style="width: 150px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
     </div>
-
     <el-table
       v-loading="listLoading"
       :key="tableKey"
@@ -14,7 +15,6 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column label="ID" prop="id" sortable="custom" align="center" width="65">
         <template slot-scope="scope">
@@ -65,9 +65,8 @@
         </template>
       </el-table-column>
     </el-table>
-
+    </el-scrollbar>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getUserList" />
-
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 800px; margin-left:50px;">
         <el-form-item label="币种名称" prop="type">
@@ -108,13 +107,22 @@
         <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
       </span>
     </el-dialog>
-
   </div>
 </template>
 <style>
   .user-head{
     width:58px;
     height: 58px;
+  }
+  .el-table__body-wrapper{
+    width: auto;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  .el-table{
+    display: inline-block;
+    width: auto;
+    max-width: fit-content;
   }
 </style>
 

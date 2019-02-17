@@ -21,7 +21,6 @@
 //全局样式
 .app-container {
     padding: 20px;
-    overflow: auto;
     height: 100%;
     &.nopad{
       padding: 0px;
@@ -39,7 +38,7 @@
   overflow:hidden;
 }
 .el-scrollbar__wrap {
-  overflow-x: hidden;
+  height: calc(100vh - 229px);
 }
 #app .svg-icon{
   margin-right: 5px;
