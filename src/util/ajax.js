@@ -65,7 +65,8 @@ const service = axios.create({
 });
 
 // baseURL
-axios.defaults.baseURL = 'http://47.52.132.133:8080';
+//axios.defaults.baseURL = 'http://47.52.132.133:8080';
+axios.defaults.baseURL = 'http://localhost'
 
 // http request 拦截器
 // 每次请求都为http头增加Authorization字段，其内容为token

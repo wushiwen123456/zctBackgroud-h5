@@ -5,6 +5,13 @@ function random(n) {
   return parseInt((Math.random() + 1) * Math.pow(10,n-1))
 }
 
+export function getToken() {
+  return request({
+    url: '/qiniu/upload/token', // 假地址 自行替换
+    method: 'get'
+  })
+}
+
 export function login(userinfo) {
   var arr = new Array()
   arr.push(new Date().getTime())
@@ -100,6 +107,23 @@ export function verifyUserCard(data){
     data: data
   });
 }
+
+export function getArticles(query){
+  return request({
+    url: '/admin/information/getArticles',
+    method: 'post',
+    data: query
+  });
+}
+
+export function fetchArticle(id){
+  return request({
+    url: '/admin/information/getArticle/' + id,
+    method: 'get'
+  });
+}
+
+
 
 // export function getInfo(token) {
 //   return request({
