@@ -1,6 +1,16 @@
 <template>
   <article-detail :is-edit="false"/>
 </template>
+<style>
+.el-form-item__label{
+  width: 90px!important;
+  text-align: left;
+}
+.extend{
+  overflow: auto;
+}
+</style>
+
 
 <script>
 import ArticleDetail from './components/ArticleDetail'

@@ -6,8 +6,9 @@
       :show-file-list="false"
       :on-success="handleImageSuccess"
       class="image-uploader"
+      name="image"
       drag
-      action="https://httpbin.org/post">
+      action="http://47.52.132.133:8080/app/uploadImage">
       <i class="el-icon-upload"/>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
     </el-upload>

@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { getToken } from '@/api/qiniu'
+import { getToken } from '@/api/index'
 
 export default {
   name: 'SingleImageUpload2',
@@ -59,6 +59,7 @@ export default {
       return new Promise((resolve, reject) => {
         getToken().then(response => {
           const key = response.data.qiniu_key
+          alert(key)
           const token = response.data.qiniu_token
           _self._data.dataObj.token = token
           _self._data.dataObj.key = key
