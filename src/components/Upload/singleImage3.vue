@@ -6,9 +6,8 @@
       :show-file-list="false"
       :on-success="handleImageSuccess"
       class="image-uploader"
-      name="image"
       drag
-      action="http://47.52.132.133:8080/app/uploadImage">
+      action="http://localhost/admin/upload/index">
       <i class="el-icon-upload"/>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
     </el-upload>
@@ -61,7 +60,7 @@ export default {
       this.$emit('input', val)
     },
     handleImageSuccess(file) {
-      this.emitInput(file.files.file)
+      this.emitInput("http://localhost/" + file.data)
     },
     beforeUpload() {
       const _self = this

@@ -32,23 +32,25 @@
             </div>
           </el-col>
         </el-row>
-
+        <el-form-item label="封面图片:" label-width="90px" prop="image_uri" style="margin-bottom: 30px;">
+          <Upload v-model="postForm.image_uri" />
+        </el-form-item>
         <el-form-item prop="content" style="margin-bottom: 30px;">
           <Tinymce ref="editor" :height="400" v-model="postForm.content" />
         </el-form-item>
-
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-          <Upload v-model="postForm.image_uri" />
-        </el-form-item>
+        <el-form-item>
+        <el-button :loading="loading" type="primary" style="width:160px; text-align:center" @click.native.prevent="submitForm">
+          发 布 
+        </el-button>
+    </el-form-item>
       </div>
     </el-form>
-
   </div>
 </template>
 
 <script>
 import Tinymce from '@/components/TinymceAll'
-import Upload from '@/components/Upload/singleImage3'
+import Upload from '@/components/Upload/singleImage2'
 import MDinput from '@/components/MDinput'
 // import Sticky from '@/components/Sticky' // 粘性header组件
 import { validateURL } from '@/util/validate'
@@ -110,7 +112,7 @@ export default {
       loading: false,
       userListOptions: [],
       rules: {
-        image_uri: [{ validator: validateRequire }],
+        // image_uri: [{ validator: validateRequire }],
         // title: [{ validator: validateRequire }],
         title: [{ required: true, message: '请输入文章标题', trigger: 'blur' }],
         display_time: [{ required: true, message: '请选择发布时间', trigger: 'blur' }],
@@ -161,7 +163,7 @@ export default {
       this.$store.dispatch('updateVisitedView', route)
     },
     submitForm() {
-      this.postForm.display_time = parseInt(this.display_time / 1000)
+      // this.postForm.display_time = parseInt(this.display_time / 1000)
       console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
@@ -210,7 +212,7 @@ export default {
 .createPost-container {
   position: relative;
   .createPost-main-container {
-    padding: 40px 45px 20px 50px;
+    padding: 10px 45px 20px 50px;
     .postInfo-container {
       position: relative;
       &:after {

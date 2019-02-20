@@ -7,7 +7,7 @@
       :on-success="handleImageSuccess"
       class="image-uploader"
       drag
-      action="https://httpbin.org/post">
+      action="http://localhost/admin/upload/index">
       <i class="el-icon-upload"/>
       <div class="el-upload__text">Drag或<em>点击上传</em></div>
     </el-upload>
@@ -51,15 +51,14 @@ export default {
     emitInput(val) {
       this.$emit('input', val)
     },
-    handleImageSuccess() {
-      this.emitInput(this.tempUrl)
+    handleImageSuccess(file) {
+      this.emitInput("http://localhost/" + file.data)
     },
     beforeUpload() {
       const _self = this
       return new Promise((resolve, reject) => {
         getToken().then(response => {
           const key = response.data.qiniu_key
-          alert(key)
           const token = response.data.qiniu_token
           _self._data.dataObj.token = token
           _self._data.dataObj.key = key
@@ -76,8 +75,8 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 .upload-container {
-  width: 100%;
-  height: 100%;
+  width: 360px;
+  height: 180px;
   position: relative;
   .image-uploader {
     height: 100%;
@@ -91,17 +90,18 @@ export default {
     border: 1px dashed #d9d9d9;
     .image-preview-wrapper {
       position: relative;
-      width: 100%;
-      height: 100%;
+      width: 360px;
+      height: 180px;
       img {
         width: 100%;
         height: 100%;
+        
       }
     }
     .image-preview-action {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      width: 360px;
+      height: 180px;
       left: 0;
       top: 0;
       cursor: default;
