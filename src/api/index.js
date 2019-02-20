@@ -123,6 +123,14 @@ export function fetchArticle(id){
   });
 }
 
+export function publishArticle(data){
+  return request({
+    url: '/admin/news/publish',
+    method: 'post',
+    data: data
+  });
+}
+
 
 
 // export function getInfo(token) {
