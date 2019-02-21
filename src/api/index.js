@@ -110,7 +110,7 @@ export function verifyUserCard(data){
 
 export function getArticles(query){
   return request({
-    url: '/admin/information/getArticles',
+    url: '/admin/news/getArticles',
     method: 'post',
     data: query
   });
@@ -118,7 +118,7 @@ export function getArticles(query){
 
 export function fetchArticle(id){
   return request({
-    url: '/admin/information/getArticle/' + id,
+    url: '/admin/news/getArticle/' + id,
     method: 'get'
   });
 }
@@ -130,6 +130,15 @@ export function publishArticle(data){
     data: data
   });
 }
+
+export function modifyNewsStatus(id){
+  return request({
+    url: '/admin/news/modifyNewsStatus/' + id,
+    method: 'get'
+  });
+}
+
+
 
 
 

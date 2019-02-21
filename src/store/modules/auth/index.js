@@ -138,7 +138,13 @@ const actions = {
                         item.name = '/' + item.name
                         path = item.name
                     } else {
-                        component = () => import("@/page" + item.name)
+                        let tempName = item.name
+                        let n = item.name.indexOf(":")
+                        
+                        if (n > 0) {
+                            tempName = item.name.substring(0, n - 1)
+                        }
+                        component = () => import("@/page/" + tempName)
                         let p = item.name
                         let pos = p.indexOf('/')
                         path = p.substring(pos + 1)

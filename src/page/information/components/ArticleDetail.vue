@@ -139,13 +139,14 @@ export default {
   methods: {
     fetchData(id) {
       fetchArticle(id).then(response => {
-        this.postForm = response.data
-        // Just for test
-        this.postForm.title += `   Article Id:${this.postForm.id}`
-        this.postForm.content_short += `   Article Id:${this.postForm.id}`
-
+        this.postForm.title = response.data.title
+        this.postForm.content = response.data.content
+        this.postForm.content = response.data.content
+        this.postForm.image_uri = response.data.index_image
+        this.postForm.display_time = new Date(response.data.index_image * 1000)
+        
         // Set tagsview title
-        this.setTagsViewTitle()
+        // this.setTagsViewTitle()
       }).catch(err => {
         console.log(err)
       })
@@ -157,11 +158,14 @@ export default {
     },
     submitForm() {
       //this.postForm.display_time = parseInt(this.display_time / 1000)
-      this.postForm.display_time = this.postForm.display_time.getTime()
-      console.log(this.postForm)
+      
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
+          this.postForm.display_timestamp = this.postForm.display_time.getTime() / 1000
+          if (this.postForm.image_uri == ''){
+            this.postForm.image_uri = 'uploads/default_index_image.png'
+          }
           publishArticle(this.postForm).then( res => {
             if (res.code == 200) {
               this.$message({
