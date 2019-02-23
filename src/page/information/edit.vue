@@ -1,5 +1,5 @@
 <template>
-  <article-detail :is-edit="false"/>
+  <article-detail :is-edit="true"/>
 </template>
 <style>
 .el-form-item__label{
@@ -16,7 +16,7 @@
 import ArticleDetail from './components/ArticleDetail'
 
 export default {
-  name: 'CreateForm',
+  name: 'EditForm',
   components: { ArticleDetail }
 }
 </script>

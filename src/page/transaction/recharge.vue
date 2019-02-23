@@ -3,9 +3,9 @@
   <div class="app-container">
     <el-scrollbar>
     <div class="filter-container">
-      <router-link :to="'/information/create'">
-        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit">添 加</el-button>
-      </router-link>
+      <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
+      <el-input placeholder="订单编号" v-model="listQuery.orderid" style="width: 200px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -20,64 +20,101 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="标题" align="center" min-width="150px">
+      <el-table-column label="用户名称" align="center" min-width="150px">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.title }}</el-tag>
+          <span>{{ scope.row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="新闻封面图" width="200px" align="center">
+      <el-table-column label="手机号码" align="center" min-width="150px">
         <template slot-scope="scope">
-          <!-- <span>{{ scope.row.head }}</span> -->
-          <img class="index-img" :src="indexImg(scope.row.index_img)" />
+          <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="110px" align="center">
+      <el-table-column label="订单编号" width="200px" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
+          <span>{{ scope.row.orderid }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="显示时间" min-width="150px" align="center">
+      <el-table-column label="充值币种" min-width="90px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.display_time | parseTime() }}</span>
+          <span>{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" min-width="150px" align="center">
+      <el-table-column label="充值地址" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.address }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="充值金额" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.amount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="充币时间" min-width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.create_time | parseTime() }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="修改时间" min-width="150px" align="center">
+      <el-table-column label="确认完成时间" min-width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.update_time | parseTime() }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="充值状态" width="110px" align="center">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <router-link :to="'/information/edit/'+scope.row.id">
-            <el-button type="primary" size="small">编辑</el-button>
-          </router-link>
-          <el-button type="danger"  size="mini" @click="modifyNewsStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button>
+          <el-button type="primary"  size="mini" @click="handleDetail(scope.row)">详 情</el-button>
         </template>
       </el-table-column>
     </el-table>
     </el-scrollbar>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pageSize" @pagination="getArticles" />
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
-      </span>
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getDepositList" />
+    <el-dialog title="充币详情" :visible.sync="dialogFormVisible" v-bind:style="{height:fullHeight}" customClass="customWH">
+      <el-scrollbar>
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
+        <el-form-item label="用户名称">
+          <span>{{ temp.username }}</span>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <span>{{ temp.phone }}</span>
+        </el-form-item>
+        <el-form-item label="订单编号">
+          <span>{{ temp.orderid }}</span>
+        </el-form-item>
+        <el-form-item label="充值币种">
+          <span>{{ temp.title }}</span>
+        </el-form-item>
+        <el-form-item label="充值地址">
+          <span style="max-width:300px;">{{ temp.address }}</span>
+        </el-form-item>
+        <el-form-item label="充值金额">
+          <span>{{ temp.amount }}</span>
+        </el-form-item>
+        <el-form-item label="充币时间">
+          <span>{{ temp.create_time }}</span>
+        </el-form-item>
+        <el-form-item label="确认完成时间">
+          <span>{{ temp.update_time }}</span>
+        </el-form-item>
+        <el-form-item label="充值状态">
+          <span>{{ temp.status }}</span>
+        </el-form-item>
+      </el-form>
+      </el-scrollbar>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 <style>
-  .index-img{
-    width:180px;
-    height: 90px;
+  .user-head{
+    width:58px;
+    height: 58px;
   }
   .el-table__body-wrapper{
     width: auto;
@@ -89,10 +126,19 @@
     width: auto;
     max-width: fit-content;
   }
+
+  .customWH {
+  margin-top: 5vh!important;
+  width: 60%;
+  height: 90%;
+}
+.el-dialog__body{
+  padding: 15px 20px
+}
 </style>
 
 <script>
-import { getArticles, modifyNewsStatus } from '@/api/index'
+import { getDepositList, getDepositDetail } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -111,31 +157,31 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'NewsList',
+  name: 'UserList',
   components: { Pagination },
   directives: { waves },
   filters: {
     statusFilter(status, type) {
       if (type == 0) {
         const statusMap = {
-            0: 'success',
-            1: 'danger'
+            'DONE': 'success',
+            'PEND': 'danger'
           }
         return statusMap[status]
       } else {
         const statusMap = {
-            0: '已发布',
-            1: '已删除'
+            'DONE': '已完成',
+            'PEND': '确认中'
           }
         return statusMap[status]
       }
     },
     statusOpFilter(status) {
-       const statusMap = {
-            0: '删除',
-            1: '发布'
+      const statusMap = {
+            1: '冻结',
+            2: '恢复'
           }
-       return statusMap[status]
+      return statusMap[status]
     },
     isMenu(ismenu) {
       const menuMap = {
@@ -159,9 +205,12 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      fullHeight: document.documentElement.clientHeight + 'px',
       listQuery: {
         page: 1,
-        pageSize: 20
+        limit: 20,
+        orderid: undefined,
+        phone: undefined
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -194,54 +243,22 @@ export default {
     }
   },
   created() {
-    this.getArticles()
+    this.getDepositList()
   },
   methods: {
-    getArticles(){
+    getDepositList(){
       this.listLoading = true
-      getArticles(this.listQuery).then(response => {
-        this.list = response.data.newsList
-        this.total = response.data.count
+      getDepositList(this.listQuery).then(response => {
+        this.list = response.data.list
+        this.total = response.data.total
         if (this.list.length == this.listQuery.limit)
-          this.listQuery.limit++
+          this.listQuery.page++
         this.listLoading = false
       })
     },
     handleFilter() {
       this.listQuery.page = 1
-      this.getUserList()
-    },
-    modifyNewsStatus(row) {
-
-      let title = ''
-      if (row.status == 0)
-        title = '当前操作将会下架该文章，是否继续？'
-      else 
-        title = '当前操作将会上架该文章，是否继续？'
-
-      this.$confirm(title, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          center: true
-        }).then(() => {
-          modifyNewsStatus(row.id).then(res => {
-          if (res.code == 200) {
-              this.$message({
-                message: res.data.desc,
-                type: 'success'
-              })
-              row.status = res.data.status
-            } else {
-              this.$message({
-                message: res.error,
-                type: 'warn'
-              })
-            }
-          })
-          
-        }).catch(() => {
-        });
+      this.getDepositList()
     },
     sortChange(data) {
       const { prop, order } = data
@@ -294,14 +311,10 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
+    handleDetail(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -368,10 +381,13 @@ export default {
     }
   },
   computed: {
-    indexImg() {
-      return function(img) {
-        return "http://localhost/" + img
+    headImg() {
+      return function(head) {
         //return this.$static + 'uploads/' + '20190121/567429d6137b7e075648b600a87dcfd2.jpg'
+          if (head == null || head == '')
+          return this.$static + 'uploads/' + 'default_head.png'
+          else 
+          return this.$static + 'uploads/' + head
       }
       
     },

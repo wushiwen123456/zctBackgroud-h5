@@ -3,9 +3,15 @@
   <div class="app-container">
     <el-scrollbar>
     <div class="filter-container">
-      <router-link :to="'/information/create'">
-        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit">添 加</el-button>
-      </router-link>
+      <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
+      <el-input placeholder="订单编号" v-model="listQuery.orderid" style="width: 200px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-select @change="selectedChange" v-model="listQuery.type" placeholder="托管类型" clearable class="filter-item" style="width: 130px;margin-left: 10px;">
+        <el-option v-for="item in trusteeTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+      </el-select>
+      <el-select @change="selectedChange" v-model="listQuery.status" placeholder="托管状态" clearable class="filter-item" style="width: 130px;margin-left: 10px;">
+        <el-option v-for="item in trusteeStatusOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+      </el-select>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -20,25 +26,45 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="标题" align="center" min-width="150px">
+      <el-table-column label="用户名称" align="center" min-width="150px">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.title }}</el-tag>
+          <span>{{ scope.row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="新闻封面图" width="200px" align="center">
+      <el-table-column label="手机号码" align="center" min-width="150px">
         <template slot-scope="scope">
-          <!-- <span>{{ scope.row.head }}</span> -->
-          <img class="index-img" :src="indexImg(scope.row.index_img)" />
+          <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="110px" align="center">
+      <el-table-column label="订单编号" width="200px" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
+          <span>{{ scope.row.orderid }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="显示时间" min-width="150px" align="center">
+      <el-table-column label="托管币种" min-width="90px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.display_time | parseTime() }}</span>
+          <span>{{ scope.row.title }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="托管类型" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.type }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否自动续托" min-width="90px" align="center">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.auto_renewal == 1 ? '是' :  '否' }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="托管金额" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.amount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="收益" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span v-if="scope.row.type == '随托随取'">{{ scope.row.amount }}(累计)</span>
+          <span v-else>{{ scope.row.income.total }}(预期)</span>
         </template>
       </el-table-column>
       <el-table-column label="创建时间" min-width="150px" align="center">
@@ -46,38 +72,83 @@
           <span>{{ scope.row.create_time | parseTime() }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="修改时间" min-width="150px" align="center">
+      <el-table-column label="托管状态" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.update_time | parseTime() }}</span>
+          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <router-link :to="'/information/edit/'+scope.row.id">
-            <el-button type="primary" size="small">编辑</el-button>
-          </router-link>
-          <el-button type="danger"  size="mini" @click="modifyNewsStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button>
+          <el-button type="primary"  size="mini" @click="handleDetail(scope.row)">详 情</el-button>
         </template>
       </el-table-column>
     </el-table>
     </el-scrollbar>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pageSize" @pagination="getArticles" />
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
-      </span>
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getTrusteeList" />
+    <el-dialog title="充币详情" :visible.sync="dialogFormVisible" v-bind:style="{height:fullHeight}" customClass="customWH">
+      <el-scrollbar>
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
+        <el-form-item label="用户名称">
+          <span>{{ temp.username }}</span>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <span>{{ temp.phone }}</span>
+        </el-form-item>
+        <el-form-item label="订单编号">
+          <span>{{ temp.orderid }}</span>
+        </el-form-item>
+        <el-form-item label="托管币种">
+          <span>{{ temp.title }}</span>
+        </el-form-item>
+        <el-form-item label="托管类型">
+          <span>{{ temp.type }}</span>
+        </el-form-item>
+        <el-form-item label="是否自动续托">
+          <span>{{ temp.auto_renewal == 1 ? '是' :  '否' }}</span>
+        </el-form-item>
+        <el-form-item label="托管金额">
+          <span>{{ temp.amount }}</span>
+        </el-form-item>
+        <el-form-item label="托管手续费">
+          <span>{{ temp.fee }}</span>
+        </el-form-item>
+        <el-form-item label="开始日期">
+          <span>{{ temp.start_date }}</span>
+        </el-form-item>
+         <el-form-item label="结束日期">
+          <span>{{ temp.stop_date }}</span>
+        </el-form-item>
+        <el-form-item label="昨日收益">
+          <span>{{ temp.income.yesterday }}</span>
+        </el-form-item>
+        <el-form-item label="昨日收益(CNY)">
+          <span>{{ temp.income.yesterday_cny }}</span>
+        </el-form-item>
+         <el-form-item label="总收益">
+          <span v-if="temp.type == '随托随取'">{{ temp.income.total}}(累计)</span>
+          <span v-else>{{ temp.income.total }}(预期)</span>
+        </el-form-item>
+         <el-form-item label="总收益(CNY)">
+          <span >{{ temp.income.total_cny }}</span>
+        </el-form-item>
+        <el-form-item label="创建时间">
+          <span>{{ temp.create_time }}</span>
+        </el-form-item>
+        <el-form-item label="托管状态">
+          <span>{{ temp.status | statusFilter(1) }}</span>
+        </el-form-item>
+      </el-form>
+      </el-scrollbar>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 <style>
-  .index-img{
-    width:180px;
-    height: 90px;
+  .user-head{
+    width:58px;
+    height: 58px;
   }
   .el-table__body-wrapper{
     width: auto;
@@ -89,19 +160,42 @@
     width: auto;
     max-width: fit-content;
   }
+
+  .customWH {
+  margin-top: 5vh!important;
+  width: 60%;
+  height: 90%;
+}
+.el-dialog__body{
+  padding: 15px 20px
+}
 </style>
 
 <script>
-import { getArticles, modifyNewsStatus } from '@/api/index'
+import { getTrusteeList } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+import { uniqueArr } from '../../util';
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
   { key: 'US', display_name: 'USA' },
   { key: 'JP', display_name: 'Japan' },
   { key: 'EU', display_name: 'Eurozone' }
+]
+
+const trusteeTypeOptions = [
+  { key: '随托随取', display_name: '随托随取' },
+  { key: '托管30天', display_name: '托管30天' },
+  { key: '托管90天', display_name: '托管90天' },
+  { key: '托管180天', display_name: '托管180天' }
+]
+
+const trusteeStatusOptions = [
+  { key: 0, display_name: '已取消' },
+  { key: 1, display_name: '托管中' },
+  { key: 2, display_name: '已完成' }
 ]
 
 // arr to obj ,such as { CN : "China", US : "USA" }
@@ -111,31 +205,33 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'NewsList',
+  name: 'UserList',
   components: { Pagination },
   directives: { waves },
   filters: {
     statusFilter(status, type) {
       if (type == 0) {
         const statusMap = {
-            0: 'success',
-            1: 'danger'
+            0: 'danger',
+            1: 'success',
+            2: 'info'
           }
         return statusMap[status]
       } else {
         const statusMap = {
-            0: '已发布',
-            1: '已删除'
+            0: '已取消',
+            1: '托管中',
+            2: '已完成'
           }
         return statusMap[status]
       }
     },
     statusOpFilter(status) {
-       const statusMap = {
-            0: '删除',
-            1: '发布'
+      const statusMap = {
+            1: '冻结',
+            2: '恢复'
           }
-       return statusMap[status]
+      return statusMap[status]
     },
     isMenu(ismenu) {
       const menuMap = {
@@ -159,23 +255,24 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      fullHeight: document.documentElement.clientHeight + 'px',
       listQuery: {
         page: 1,
-        pageSize: 20
+        limit: 20,
+        orderid: undefined,
+        phone: undefined,
+        type:undefined,
+        status:undefined
       },
       importanceOptions: [1, 2, 3],
+      trusteeTypeOptions,
+      trusteeStatusOptions,
       calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        income:{}
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -194,54 +291,25 @@ export default {
     }
   },
   created() {
-    this.getArticles()
+    this.getTrusteeList()
   },
   methods: {
-    getArticles(){
+    selectedChange(){
+      this.handleFilter()
+    },
+    getTrusteeList(e){
+      if (e != null) {
+      }
       this.listLoading = true
-      getArticles(this.listQuery).then(response => {
-        this.list = response.data.newsList
-        this.total = response.data.count
-        if (this.list.length == this.listQuery.limit)
-          this.listQuery.limit++
+      getTrusteeList(this.listQuery).then(response => {
+        this.list = response.data.list
+        this.total = response.data.total
         this.listLoading = false
       })
     },
     handleFilter() {
       this.listQuery.page = 1
-      this.getUserList()
-    },
-    modifyNewsStatus(row) {
-
-      let title = ''
-      if (row.status == 0)
-        title = '当前操作将会下架该文章，是否继续？'
-      else 
-        title = '当前操作将会上架该文章，是否继续？'
-
-      this.$confirm(title, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          center: true
-        }).then(() => {
-          modifyNewsStatus(row.id).then(res => {
-          if (res.code == 200) {
-              this.$message({
-                message: res.data.desc,
-                type: 'success'
-              })
-              row.status = res.data.status
-            } else {
-              this.$message({
-                message: res.error,
-                type: 'warn'
-              })
-            }
-          })
-          
-        }).catch(() => {
-        });
+      this.getTrusteeList()
     },
     sortChange(data) {
       const { prop, order } = data
@@ -294,14 +362,10 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
+    handleDetail(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -368,10 +432,13 @@ export default {
     }
   },
   computed: {
-    indexImg() {
-      return function(img) {
-        return "http://localhost/" + img
+    headImg() {
+      return function(head) {
         //return this.$static + 'uploads/' + '20190121/567429d6137b7e075648b600a87dcfd2.jpg'
+          if (head == null || head == '')
+          return this.$static + 'uploads/' + 'default_head.png'
+          else 
+          return this.$static + 'uploads/' + head
       }
       
     },

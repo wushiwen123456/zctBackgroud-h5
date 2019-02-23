@@ -74,7 +74,7 @@
       </el-table-column>
     </el-table>
   </el-scrollbar>
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" v-bind:style="{height:fullHeight}" customClass="customWH">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" customClass="customWH">
       <el-scrollbar style="height:100%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
         <el-form-item label="币种名称" prop="symbol">
@@ -136,14 +136,14 @@
   width: 60%;
   height: 90%;
 }
-.el-dialog__body{
-  height:75%;
-  padding: 15px 20px
-}
+
 .el-table__body-wrapper{
     width: auto;
     display: inline-block;
     vertical-align: bottom;
+}
+.el-dialog__body{
+  padding: 15px 20px
 }
 .el-table{
   display: inline-block;
@@ -222,7 +222,6 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      fullHeight: document.documentElement.clientHeight + 'px',
       listQuery: {
         page: 1,
         pageSize: 20,

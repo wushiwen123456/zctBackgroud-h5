@@ -55,6 +55,14 @@ export default {
     }
   },
   computed: {
+    pageSize: {
+      get() {
+        return this.limit
+      },
+      set(val) {
+        this.$emit('update:limit', val)
+      }
+    },
     currentPage: {
       get() {
         return this.page
@@ -63,17 +71,11 @@ export default {
         this.$emit('update:page', val)
       }
     },
-    pageSize: {
-      get() {
-        return this.limit
-      },
-      set(val) {
-        this.$emit('update:limit', val)
-      }
-    }
+    
   },
   methods: {
     handleSizeChange(val) {
+      this.pageSize = val
       this.$emit('pagination', { page: this.currentPage, limit: val })
       if (this.autoScroll) {
         scrollTo(0, 800)

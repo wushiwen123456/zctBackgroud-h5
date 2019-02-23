@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     imageUrl() {
-      return this.value
+      return this.value == '' ? '' : "http://localhost/" + this.value 
     }
   },
   methods: {
@@ -52,7 +52,7 @@ export default {
       this.$emit('input', val)
     },
     handleImageSuccess(file) {
-      this.emitInput("http://localhost/" + file.data)
+      this.emitInput(file.data)
     },
     beforeUpload() {
       const _self = this

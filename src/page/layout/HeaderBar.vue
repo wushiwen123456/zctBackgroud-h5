@@ -25,13 +25,13 @@
         <el-dialog title="修改密码" :visible.sync="dialog.editPaw.show" :modal-append-to-body="false" custom-class="editPawDialog">
             <el-form :model="editPaw" :rules="editPawRules" ref="editPaw" label-width="100px" >
                 <el-form-item label="旧密码" prop="oldPaw">
-                    <el-input v-model="editPaw.oldPaw" auto-complete="off"></el-input>
+                    <el-input type="password" v-model="editPaw.oldPaw" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="新密码" prop="newPaw">
-                    <el-input v-model="editPaw.newPaw" auto-complete="off"></el-input>
+                    <el-input type="password" v-model="editPaw.newPaw" @paste.native.capture.prevent="handlePaste" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="确认新密码" prop="confirmNewPaw">
-                    <el-input v-model="editPaw.confirmNewPaw" auto-complete="off"></el-input>
+                    <el-input type="password" v-model="editPaw.confirmNewPaw" @paste.native.capture.prevent="handlePaste" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div class="textC">
@@ -44,7 +44,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-
+import {modifyPwd} from '@/api/index'
 export default {
     data() {
         return {
@@ -64,30 +64,30 @@ export default {
                 ],
                 newPaw: [
                     {required: true, message: '请输入新密码', trigger: 'blur'},
-                    {min: 8, max: 20, message: '长度在 8 到 20 个字符', trigger: 'blur'},
+                    {min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur'},
                     {
                         // eslint-disable-next-line
                         validator(rule, value, callback, source, options) {
                             var errors = [];
-                            if(!/^[a-z0-9]+$/.test(value)) {
-                                console.log("不符合输入规则")
-                                errors.push("请输入字母或特殊字符")
-                            }
+                            // if(!/^[a-z0-9]+$/.test(value)) {
+                            //     console.log("不符合输入规则")
+                            //     errors.push("请输入字母或特殊字符")
+                            // }
                             callback(errors);
                         }
                     }
                 ],
                 confirmNewPaw: [
                     {required: true, message: '请再次输入新密码', trigger: 'blur'},
-                    {min: 8, max: 20, message: '长度在 8 到 20 个字符', trigger: 'blur'},
+                    {min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur'},
                     {
                         // eslint-disable-next-line
                         validator(rule, value, callback, source, options) {
                             var errors = [];
-                            if(!/^[a-z0-9]+$/.test(value)) {
-                                console.log("不符合输入规则")
-                                errors.push("请输入字母或特殊字符")
-                            }
+                            // if(!/^[a-z0-9]+$/.test(value)) {
+                            //     console.log("不符合输入规则")
+                            //     errors.push("请输入字母或特殊字符")
+                            // }
                             callback(errors);
                         }
                     }
@@ -133,9 +133,25 @@ export default {
         editPawSubmit(){
             this.$refs.editPaw.validate((valid) => {
                 if (valid) {
+                    modifyPwd(this.editPaw).then(res => {
+                    if (res.code == 200) {
+                        this.$message({
+                            message: '修改密码成功',
+                            type: 'success'
+                        })
+                        this.$refs.editPaw.resetFields()
+                        this.dialog.editPaw.show = false
+                        } else {
+                        this.$message({
+                            message: res.error,
+                            type: 'error'
+                        })
+                        }
+                    })
+
                     console.log("修改密码表单提交")
                 } else {
-                    console.log('error submit!!');
+                    console.log('error validate!!');
                     return false;
                 }
             });

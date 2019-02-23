@@ -26,6 +26,14 @@ export function login(userinfo) {
   })
 }
 
+export function modifyPwd(data) {
+  return request({
+    url: '/admin/index/setinfo',
+    method: 'post',
+    data: data
+  })
+}
+
 export function refreshToken(token) {
   return request({
       url: '/admin/index/refreshToken/' + token,
@@ -131,12 +139,53 @@ export function publishArticle(data){
   });
 }
 
+export function updateArticle(data){
+  return request({
+    url: '/admin/news/update',
+    method: 'post',
+    data: data
+  });
+}
+
 export function modifyNewsStatus(id){
   return request({
     url: '/admin/news/modifyNewsStatus/' + id,
     method: 'get'
   });
 }
+
+export function getDepositList(data){
+  return request({
+    url: 'admin/deposit/getList',
+    method: 'get',
+    params: data
+  });
+}
+
+export function getWithDrawList(data){
+  return request({
+    url: 'admin/withdraw/getList',
+    method: 'get',
+    params: data
+  });
+}
+
+export function getTranslateList(data){
+  return request({
+    url: 'admin/translate/getList',
+    method: 'get',
+    params: data
+  });
+}
+
+export function getTrusteeList(data){
+  return request({
+    url: 'admin/trustee/getList',
+    method: 'get',
+    params: data
+  });
+}
+
 
 
 

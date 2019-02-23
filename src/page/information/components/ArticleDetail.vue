@@ -40,7 +40,7 @@
         </el-form-item>
         <el-form-item>
         <el-button :loading="loading" type="primary" style="width:160px; text-align:center" @click.native.prevent="submitForm">
-          发 布 
+          {{subBtnName}} 
         </el-button>
     </el-form-item>
       </div>
@@ -54,7 +54,7 @@ import Upload from '@/components/Upload/singleImage2'
 import MDinput from '@/components/MDinput'
 // import Sticky from '@/components/Sticky' // 粘性header组件
 import { validateURL } from '@/util/validate'
-import { publishArticle, fetchArticle } from '@/api/index'
+import { publishArticle, updateArticle, fetchArticle } from '@/api/index'
 // import { CommentDropdown, PlatformDropdown, SourceUrlDropdown } from './Dropdown'
 
 const defaultForm = {
@@ -121,6 +121,9 @@ export default {
     },
     lang() {
       return this.$store.getters.language
+    },
+    subBtnName(){
+      return this.isEdit ? '修 改' : '发 布'
     }
   },
   created() {
@@ -139,11 +142,11 @@ export default {
   methods: {
     fetchData(id) {
       fetchArticle(id).then(response => {
+        this.postForm.id = response.data.id
         this.postForm.title = response.data.title
         this.postForm.content = response.data.content
-        this.postForm.content = response.data.content
-        this.postForm.image_uri = response.data.index_image
-        this.postForm.display_time = new Date(response.data.index_image * 1000)
+        this.postForm.image_uri = response.data.index_img
+        this.postForm.display_time = new Date(response.data.display_time * 1000)
         
         // Set tagsview title
         // this.setTagsViewTitle()
@@ -166,14 +169,26 @@ export default {
           if (this.postForm.image_uri == ''){
             this.postForm.image_uri = 'uploads/default_index_image.png'
           }
-          publishArticle(this.postForm).then( res => {
-            if (res.code == 200) {
-              this.$message({
-                message: '发布文章成功',
-                type: 'success'
-              })
-            }
-          })
+          if (this.isEdit) {
+            updateArticle(this.postForm).then( res => {
+              if (res.code == 200) {
+                this.$message({
+                  message: '修改文章成功',
+                  type: 'success'
+                })
+              }
+            })
+          } else {
+            publishArticle(this.postForm).then( res => {
+              if (res.code == 200) {
+                this.$message({
+                  message: '发布文章成功',
+                  type: 'success'
+                })
+              }
+            })
+          }
+          
           this.loading = false
         } else {
           console.log('validate failed!!')
