@@ -186,6 +186,13 @@ export function getTrusteeList(data){
   });
 }
 
+export function getFeedbacks(data){
+  return request({
+    url: 'admin/news/getFeedbacks',
+    method: 'get',
+    params: data
+  });
+}
 
 
 
