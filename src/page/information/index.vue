@@ -161,7 +161,8 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        pageSize: 20
+        pageSize: 20,
+        type:'news'
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -370,8 +371,8 @@ export default {
   computed: {
     indexImg() {
       return function(img) {
-        return "http://localhost/" + img
-        //return this.$static + 'uploads/' + '20190121/567429d6137b7e075648b600a87dcfd2.jpg'
+        // return "http://localhost/" + img
+        return this.$static + img
       }
       
     },

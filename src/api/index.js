@@ -194,6 +194,23 @@ export function getFeedbacks(data){
   });
 }
 
+export function getFeedbackDetail(id){
+  return request({
+    url: 'admin/news/getFeedbackDetail/' + id,
+    method: 'get'
+  });
+}
+
+export function replyFeedback(data){
+  return request({
+    url: 'admin/news/replyFeedback/',
+    method: 'post',
+    data: data
+  });
+}
+
+
+
 
 
 

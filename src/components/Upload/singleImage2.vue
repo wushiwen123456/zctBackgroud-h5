@@ -7,7 +7,7 @@
       :on-success="handleImageSuccess"
       class="image-uploader"
       drag
-      action="http://localhost/admin/upload/index">
+      action="http://47.52.132.133:8080/admin/upload/index">
       <i class="el-icon-upload"/>
       <div class="el-upload__text">Drag或<em>点击上传</em></div>
     </el-upload>
@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     imageUrl() {
-      return this.value == '' ? '' : "http://localhost/" + this.value 
+      return this.value == '' ? '' : "http://47.52.132.133:8080/" + this.value 
     }
   },
   methods: {

@@ -62,6 +62,7 @@ const defaultForm = {
   content: '', // 文章内容
   image_uri: '', // 文章图片
   display_time: undefined, // 前台展示时间
+  type: 'news'
 }
 
 export default {
@@ -71,6 +72,10 @@ export default {
     isEdit: {
       type: Boolean,
       default: false
+    },
+    type: {
+      type: String,
+      default: 'news'
     }
   },
   data() {
@@ -127,12 +132,14 @@ export default {
     }
   },
   created() {
+    defaultForm.type = this.type
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
     } else {
       this.postForm = Object.assign({}, defaultForm)
     }
+    
 
     // Why need to make a copy of this.$route here?
     // Because if you enter this page and quickly switch tag, may be in the execution of the setTagsViewTitle function, this.$route is no longer pointing to the current page

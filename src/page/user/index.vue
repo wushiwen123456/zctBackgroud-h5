@@ -240,8 +240,6 @@ export default {
       getUserList(this.listQuery).then(response => {
         this.list = response.data.userList
         this.total = response.data.count
-        if (this.list.length == this.listQuery.limit)
-          this.listQuery.limit++
         this.listLoading = false
       })
     },

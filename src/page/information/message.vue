@@ -1,15 +1,12 @@
 <template>
+
   <div class="app-container">
     <el-scrollbar>
     <div class="filter-container">
-      <el-input placeholder="会员姓名" v-model="listQuery.name" style="width: 150px; margin-left: 10px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
-      <el-select @change="selectedChange" v-model="listQuery.type" placeholder="审核状态" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in realnameTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-      </el-select>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
+      <router-link :to="'/information/createmsg'">
+        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit">添 加</el-button>
+      </router-link>
     </div>
-
     <el-table
       v-loading="listLoading"
       :key="tableKey"
@@ -23,104 +20,42 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户姓名" align="center" min-width="150px">
+      <el-table-column label="标题" align="center" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.realname }}</span>
+          <el-tag>{{ scope.row.title }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="身份证号码" align="center" min-width="150px">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id_number }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="用户手机号" align="center" min-width="150px">
-        <template slot-scope="scope">
-          <span>{{ scope.row.phone }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="正面照片" align="center" min-width="180px">
-        <template slot-scope="scope">
-          <img class="card-img" :src="cardImg(scope.row.id_card_front)" />
-        </template>
-      </el-table-column>
-      <el-table-column label="反面照片" align="center" min-width="180px">
-        <template slot-scope="scope">
-          <img class="card-img" :src="cardImg(scope.row.id_card_back)" />
-        </template>
-      </el-table-column>
-      <el-table-column label="手持照片" align="center" min-width="180px">
-        <template slot-scope="scope">
-          <img class="card-img" :src="cardImg(scope.row.id_card_in_hand)" />
-        </template>
-      </el-table-column>
-      <el-table-column label="认证时间" min-width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.create_time | parseTime() }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="审核时间" min-width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.update_time | parseTime() }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="认证状态" width="110px" align="center">
+      <el-table-column label="状态" width="110px" align="center">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="审核描述" width="110px" align="center">
+      <el-table-column label="显示时间" min-width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.remark }}</span>
+          <span>{{ scope.row.display_time | parseTime() }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="创建时间" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.create_time | parseTime() }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="修改时间" min-width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.update_time | parseTime() }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">审核</el-button>
+          <router-link :to="'/information/editmsg/'+scope.row.id">
+            <el-button type="primary" size="small">编辑</el-button>
+          </router-link>
+          <el-button type="danger"  size="mini" @click="modifyNewsStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button>
         </template>
       </el-table-column>
     </el-table>
     </el-scrollbar>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getCardList" />
-
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" customClass="customWH">
-      <el-scrollbar style="height:100%">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
-        <el-form-item label="用户姓名">
-          <el-input :disabled="true" v-model="temp.realname"/>
-        </el-form-item>
-        <el-form-item label="身份证号">
-          <el-input :disabled="true" v-model="temp.id_number"/>
-        </el-form-item>
-        <el-form-item label="用户手机号">
-          <el-input :disabled="true" v-model="temp.phone"/>
-        </el-form-item>
-        <el-form-item label="正面照片">
-          <img class="card-img-big" :src="cardImg(temp.id_card_front)" />
-        </el-form-item>
-        <el-form-item label="反面照片">
-          <img class="card-img-big" :src="cardImg(temp.id_card_back)" />
-        </el-form-item>
-        <el-form-item label="手持照片">
-          <img class="card-img-big" :src="cardImg(temp.id_card_in_hand)" />
-        </el-form-item>
-        <el-form-item label="认证状态">
-          <span>{{ temp.status | statusFilter(1) }}</span>
-        </el-form-item>
-        <el-form-item v-if="temp.status != 'success'" label="审核操作" prop="type">
-          <el-select @change="checkedChange" v-model="temp.type"  style="width: 180px">
-            <el-option v-for="item in checkOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="reason" prop="remark" label="审核拒绝原因">
-          <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.remark" type="textarea" placeholder="请填写审核不通过的原因"/>
-        </el-form-item>
-      </el-form>
-      </el-scrollbar>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确认</el-button>
-      </div>
-    </el-dialog>
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pageSize" @pagination="getArticles" />
 
     <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
       <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
@@ -131,17 +66,12 @@
         <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
       </span>
     </el-dialog>
-
   </div>
 </template>
 <style>
-  .card-img{
-    width: 160px;
+  .index-img{
+    width:180px;
     height: 90px;
-  }
-  .card-img-big{
-    width: 320px;
-    height: 180px;
   }
   .el-table__body-wrapper{
     width: auto;
@@ -153,18 +83,10 @@
     width: auto;
     max-width: fit-content;
   }
-  .customWH {
-    margin-top: 5vh!important;
-    width: 60%;
-    height: 90%;
-  }
-  .el-dialog__body{
-    padding: 15px 20px
-  }
 </style>
 
 <script>
-import { getCardList, verifyUserCard } from '@/api/index'
+import { getArticles, modifyNewsStatus } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -182,50 +104,46 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
   return acc
 }, {})
 
-const realnameTypeOptions = [
-  { key: 'pend', display_name: '未审核' },
-  { key: 'success', display_name: '审核成功' },
-  { key: 'fail', display_name: '审核失败' }
-]
-
-const checkOptions = [
-  { key: 'success', display_name: '审核成功' },
-  { key: 'fail', display_name: '审核失败' }
-]
-
 export default {
-  name: 'UserList',
+  name: 'NewsList',
   components: { Pagination },
   directives: { waves },
   filters: {
-    
-    statusOpFilter(status) {
-      const statusMap = {
-            1: '冻结',
-            2: '恢复'
-          }
-      return statusMap[status]
-    },
     statusFilter(status, type) {
       if (type == 0) {
         const statusMap = {
-          pend: 'info',
-          success: 'success',
-          fail: 'danger'
+            0: 'success',
+            1: 'danger'
           }
         return statusMap[status]
       } else {
         const statusMap = {
-          pend: '未审核',
-          success: '审核成功',
-          fail: '审核失败'
+            0: '已发布',
+            1: '已删除'
           }
         return statusMap[status]
       }
-      
+    },
+    statusOpFilter(status) {
+       const statusMap = {
+            0: '删除',
+            1: '发布'
+          }
+       return statusMap[status]
+    },
+    isMenu(ismenu) {
+      const menuMap = {
+        1: '菜单',
+        0: '按钮'
+      }
+      return menuMap[ismenu]
+    },
+    typeFilter(type) {
+      return calendarTypeKeyValue[type]
     },
     parseTime(time, timestamp){
-      if (time == null) return ''
+      if (time == null)
+        return ''
       return parseTime(time, timestamp)
     }
   },
@@ -238,26 +156,21 @@ export default {
       listQuery: {
         page: 1,
         pageSize: 20,
-        phone: undefined,
-        name: undefined,
-        type: undefined
+        type:'message'
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
-      realnameTypeOptions,
-      checkOptions,
-      reason: false,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
-      row: {},
       temp: {
         id: undefined,
         importance: 1,
         remark: '',
         timestamp: new Date(),
         title: '',
-        type: 'success'
+        type: '',
+        status: 'published'
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -268,44 +181,38 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [{ required: true, message: '请确认审核操作', trigger: 'change' }],
-        remark: [{ required: true, message: '请填写审核失败描述', trigger: 'blur' }]
+        type: [{ required: true, message: 'type is required', trigger: 'change' }],
+        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
+        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
   },
   created() {
-    this.getCardList()
+    this.getArticles()
   },
   methods: {
-    selectedChange(){
-      this.handleFilter()
-    },
-    checkedChange(){
-      if (this.temp.type == 'fail')
-        this.reason = true
-      else
-        this.reason = false
-    },
-    getCardList(){
+    getArticles(){
       this.listLoading = true
-      getCardList(this.listQuery).then(response => {
-        this.list = response.data.cardList
+      getArticles(this.listQuery).then(response => {
+        this.list = response.data.newsList
         this.total = response.data.count
+        if (this.list.length == this.listQuery.limit)
+          this.listQuery.limit++
         this.listLoading = false
       })
     },
     handleFilter() {
       this.listQuery.page = 1
-      this.getCardList()
+      this.getUserList()
     },
-    handleModifyStatus(row) {
+    modifyNewsStatus(row) {
 
       let title = ''
-      if (row.status == 1)
-        title = '当前操作将会冻结该用户，是否继续？'
+      if (row.status == 0)
+        title = '当前操作将会下架该公告，是否继续？'
       else 
-        title = '当前操作将会恢复该用户，是否继续？'
+        title = '当前操作将会上架该公告，是否继续？'
 
       this.$confirm(title, '提示', {
           confirmButtonText: '确定',
@@ -313,10 +220,10 @@ export default {
           type: 'warning',
           center: true
         }).then(() => {
-          modifyUserStatus(row.id).then(res => {
+          modifyNewsStatus(row.id).then(res => {
           if (res.code == 200) {
               this.$message({
-                message: res.data.desc,
+                message: '发布公告成功',
                 type: 'success'
               })
               row.status = res.data.status
@@ -383,45 +290,19 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.row = row
-      this.temp = Object.assign(this.temp, row) // copy obj
+      this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
-      
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
     updateData() {
-      if (this.temp.status == 'success') {
-        this.dialogFormVisible = false
-        return
-      }
-      let that = this
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          let tmpData = {}
-          tmpData.id = this.temp.id
-          tmpData.type = this.temp.type
-          tmpData.remark = this.temp.remark
-
-          verifyUserCard(tmpData).then(res => {
-          if (res.code == 200) {
-              this.$message({
-                message: res.data.desc,
-                type: 'success'
-              })
-              that.row.status = res.data.status
-              that.row.remark = res.data.remark
-              that.dialogFormVisible = false
-            } else {
-              this.$message({
-                message: res.error,
-                type: 'warn'
-              })
-            }
-          })
+          const tempData = Object.assign({}, this.temp)
+          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           // updateArticle(tempData).then(() => {
           //   for (const v of this.list) {
           //     if (v.id === this.temp.id) {
@@ -481,12 +362,14 @@ export default {
       }))
     }
   },
-  computed:{
-    cardImg(){
-      return function(img){
-        return this.$static + 'uploads/' + img
+  computed: {
+    indexImg() {
+      return function(img) {
+        return "http://localhost/" + img
+        //return this.$static + 'uploads/' + '20190121/567429d6137b7e075648b600a87dcfd2.jpg'
       }
-    }
+      
+    },
   }
 }
 </script>
