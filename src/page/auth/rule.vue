@@ -28,7 +28,7 @@
           <span>{{ scope.row.pathname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="路由" min-width="150px">
+      <el-table-column label="路由" min-width="180px">
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
           <el-tag>{{ scope.row.name }}</el-tag>

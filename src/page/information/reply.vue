@@ -13,8 +13,8 @@
                 {{item.content}}
             </span>
           </div>
-          <div v-if="item.evidence" style="margin-top:10px;max-width: 500px">
-            <img style="width:100%" :src="evidenceImg" />
+          <div v-if="item.evidence" style="margin-top:10px;max-width: 300px">
+            <img style="width:100%" :src="evidenceImg(item.evidence)" />
           </div>
         </div>
         <div v-if="item.type == 0" style="clear:both"></div>

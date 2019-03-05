@@ -29,3 +29,19 @@ export default {
     }
 }
 </script>
+<style>
+	.side-nav.left {
+    position: absolute;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    width: 170px;
+    background-color: #f4f4f4;
+    border-right: 1px solid #ccc;
+    overflow: auto;
+    box-sizing: border-box;
+}
+.sys-content.left{
+	left: 170px;
+}
+</style>

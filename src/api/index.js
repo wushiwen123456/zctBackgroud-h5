@@ -208,9 +208,39 @@ export function replyFeedback(data){
     data: data
   });
 }
-
-
-
+// 收益管理
+// 邀请收益列表
+export function incomeList(data){
+  return request({
+    url: 'admin/income/getList',
+    method: 'get',
+		params: data
+  });
+}
+// 设置邀请人数和收益
+export function setFakeCounting(data){
+  return request({
+    url: '/admin/income/setFakeCounting',
+    method: 'post',
+    data: data
+  });
+}
+// 邀请返佣收益列表
+export function incomeDetailList(data){
+  return request({
+    url: 'admin/income/getDetailList',
+    method: 'get',
+		params: data
+  });
+}
+// 设置邀请返佣记录
+export function setFakeRecord(data){
+  return request({
+    url: '/admin/income/setFakeRecord',
+    method: 'post',
+    data: data
+  });
+}
 
 
 

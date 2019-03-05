@@ -58,7 +58,7 @@
       <el-scrollbar style="height:100%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="width: 600px; margin-left:50px;">
         <el-form-item label="币种名称">
-          <el-input v-model="temp.symbol" disabled="true"/>
+          <el-input v-model="temp.symbol" disabled="disabled"/>
         </el-form-item>
         <el-form-item label="日收益百分比最小值" prop="income_rate_min">
           <el-input v-model="temp.income_rate_min" placeholder="请输入日收益百分比最小值"/>
@@ -67,7 +67,7 @@
           <el-input v-model="temp.income_rate_max" placeholder="请输入日收益百分比最大值"/>
         </el-form-item>
         <el-form-item label="托管类型">
-          <el-input v-model="temp.type" disabled="true" placeholder="请输入冲币须知"/>
+          <el-input v-model="temp.type" disabled="disabled" placeholder="请输入冲币须知"/>
         </el-form-item>
       </el-form>
       </el-scrollbar>
