@@ -47,7 +47,13 @@ export function getMenuTreeList(){
     method: 'get'
   });
 }
-
+// 获取实时提醒消息
+export function getMessage(){
+  return request({
+    url: '/admin/notice/getRolling',
+    method: 'get'
+  });
+}
 export function getMenuList(){
   return request({
     url: '/admin/index/getMenuList',

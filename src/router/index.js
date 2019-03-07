@@ -15,10 +15,10 @@ function initRoute(router){
     
     return new Promise((resolve) => {
         if(!routeInit){
-            console.log("没有权限数据，正在获取")
+            // console.log("没有权限数据，正在获取")
             store.dispatch('auth/getMenuTreeList').then(() => {
                 store.dispatch('auth/updateAppRoute').then((res) => {
-                    console.log("权限列表生成完毕")
+                    // console.log("权限列表生成完毕")
                     res.push({path: '*',redirect: '/error/404'})
                     router.addRoutes(res)
                     let origin = routeInit
@@ -39,7 +39,7 @@ function initRoute(router){
                 // })
             })
         } else{
-            console.log("已有权限数据")
+            // console.log("已有权限数据")
             resolve(true)
         }
     })
@@ -59,10 +59,10 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
     // 开启进度条
     NProgress.start();
-    console.log('=============================================')
-    console.log(to.path + '\n')
-    console.log(to.redirectedFrom)
-    console.log('=============================================')
+    // console.log('=============================================')
+    // console.log(to.path + '\n')
+    // console.log(to.redirectedFrom)
+    // console.log('=============================================')
     
     // 判断用户是否处于登录状态
     // debugger
@@ -77,7 +77,7 @@ router.beforeEach((to, from, next) => {
         } else {
             initRoute(router).then( res => {
                 let isPermission = false
-                console.log("进入权限判断 + " + res)
+                // console.log("进入权限判断 + " + res)
                 if (res) 
                     next()
                 else {
@@ -100,10 +100,10 @@ router.beforeEach((to, from, next) => {
     } else {
         // 如果是免登陆的页面则直接进入，否则跳转到登录页面
         if (whiteList.indexOf(to.path) >= 0) {
-            console.log('该页面无需登录即可访问')
+            // console.log('该页面无需登录即可访问')
             next()
         } else {
-            console.warn('当前未处于登录状态，请登录')
+            // console.warn('当前未处于登录状态，请登录')
             next({path: "/login", replace: true})
             // 如果store中有token，同时Cookie中没有登录状态
             if(store.state.user.token){
