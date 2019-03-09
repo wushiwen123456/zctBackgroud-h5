@@ -11,7 +11,7 @@
             <header-bar>
                 <p slot="logo">CoinCobo数字资产后台管理系统</p>
 				<nav-scoll  ></nav-scoll>
-                <template slot="topnav">
+               <template slot="topnav">
                     <nav-bar :layout="layout"></nav-bar>
                 </template>
             </header-bar>

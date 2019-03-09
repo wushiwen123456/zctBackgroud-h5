@@ -1,7 +1,7 @@
 <template>
     <div class="sys-header">
         <div class="logo">
-            <slot name="logo">1111</slot>
+            <slot name="logo"></slot>
         </div>
         <slot name="topnav"></slot>
         <div class="userInfo">

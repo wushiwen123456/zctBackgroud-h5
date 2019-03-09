@@ -129,6 +129,7 @@ export default {
       total: 0,
       listLoading: true,
       content: '',     
+			static:'',
       rules: {
         type: [{ required: true, message: 'type is required', trigger: 'change' }],
         timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
@@ -221,7 +222,7 @@ export default {
     },
     evidenceImg(){
       return function (img){
-        return this.static + img
+        return this.$static + 'uploads/' + img
       }
     }
   }
