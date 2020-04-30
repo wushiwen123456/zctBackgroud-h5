@@ -3,8 +3,9 @@
   <div class="app-container">
     <el-scrollbar>
     <div class="filter-container">
-      <el-input placeholder="会员名称" v-model="listQuery.nickname" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
-      <el-input placeholder="会员手机号" v-model="listQuery.phone" class="filter-item" style="width: 150px;"  @keyup.enter.native="handleFilter"/>
+      <el-input placeholder="订单编号" v-model="listQuery.number" class="filter-item" style="width: 190px;"  @keyup.enter.native="handleFilter"/>
+      <el-date-picker placeholder="开始时间" type="date" v-model="listQuery.date_min" class="filter-item" style="width: 170px;" format="yyyy-MM-dd"  value-format="yyyy-MM-dd" ></el-date-picker>
+      <el-date-picker placeholder="结束时间" type="date" v-model="listQuery.date_max" class="filter-item" style="width: 170px;" format="yyyy-MM-dd"  value-format="yyyy-MM-dd" ></el-date-picker>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleFilter">查询</el-button>
     </div>
     <el-table
@@ -20,52 +21,154 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" align="center" min-width="150px">
+			<!-- <el-table-column label="订单姓名" min-width="180px" align="center">
+			  <template slot-scope="scope">
+			    <span v-if="scope.row.mode == 1">到店服务</span>
+			    <span v-if="scope.row.mode == 2">上门服务</span>
+			  </template>
+			</el-table-column> -->
+			<el-table-column label="订单编号" min-width="180px" align="center">
+			  <template slot-scope="scope">
+			    <span>{{ scope.row.number }}</span>
+			  </template>
+			</el-table-column>
+      <el-table-column label="用户信息" align="center" min-width="150px">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.nickname }}</el-tag>
+          <span>{{ scope.row.user_name }}</span>
         </template>	
       </el-table-column>
-      <!-- <el-table-column label="用户手机号" align="center" min-width="150px">
+      <!-- <el-table-column label="上门费" min-width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.phone }}</span>
+          <span>{{ scope.row.drop_in_fee }}</span>
         </template>
       </el-table-column> -->
-      <el-table-column label="用户头像" width="110px" align="center">
+			<el-table-column label="订单名称" min-width="150px" align="center">
+			  <template slot-scope="scope">
+			    <span>{{ scope.row.product_name }}</span>
+			  </template>
+			</el-table-column>
+            <el-table-column label="订单金额" min-width="150px" align="center">
+			  <template slot-scope="scope">
+			    <span>￥{{ scope.row.amount }}元</span>
+			  </template>
+			</el-table-column>
+			<el-table-column label="订单全称" min-width="300px" align="center">
+			  <template slot-scope="scope">
+			    <span>{{ scope.row.sku_name }}</span>
+			  </template>
+			</el-table-column>
+			<el-table-column label="是否可用" min-width="150px" align="center">
+			  <template slot-scope="scope">
+			    <el-tag>{{ scope.row.available == 1 ? '可用' : '不可用' }}</el-tag>
+			  </template>
+			</el-table-column>
+            <el-table-column label="可服务次数" min-width="150px" align="center">
+			  <template slot-scope="scope">
+			    <span>{{ scope.row.service_times }}</span>
+			  </template>
+			</el-table-column>
+			<el-table-column label="联系电话" min-width="150px" align="center">
+			  <template slot-scope="scope">
+			    <span>{{ scope.row.phone || '暂无' }}</span>
+			  </template>
+			</el-table-column>
+			<el-table-column label="订单状态" min-width="150px" align="center">
+			  <template slot-scope="scope">
+			    <el-tag>{{ scope.row.status | dealStatus }}</el-tag>
+			  </template>
+			</el-table-column>
+      <!-- <el-table-column label="服务日期" min-width="150px" align="center">
         <template slot-scope="scope">
-          <!-- <span>{{ scope.row.head }}</span> -->
-          <img class="user-head" :src="scope.row.avatarurl" />
-        </template>
-      </el-table-column>
-      <el-table-column label="手机号" min-width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.phone }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="注册时间" min-width="200px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.create_time | parseTime() }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="最后一次登录时间" min-width="200px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.last_login_time | parseTime() }}</span>
-        </template>
-      </el-table-column>
-      
-      <!-- <el-table-column label="用户状态" width="110px" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter(0)" >{{ scope.row.status | statusFilter(1) }}</el-tag>
+          <span>{{ scope.row.date | parseTime() }}</span>
         </template>
       </el-table-column> -->
-      <!-- <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width"> -->
-        <!-- <template slot-scope="scope"> -->
-          <!-- <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">详情</el-button>           -->
-          <!-- <el-button type="danger"  size="mini" @click="handleModifyStatus(scope.row)">{{ scope.row.status | statusOpFilter() }}</el-button> -->
-        <!-- </template> -->
-      <!-- </el-table-column> -->
+      <!-- <el-table-column label="下单时间" min-width="200px" align="center">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.create_time }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="线下支付" width="60px" align="center">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.need_offline_payment==0">否</el-tag>
+          <el-tag v-if="scope.row.need_offline_payment==1">是</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="用户状态" width="180px" align="center">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.status==0">未服务</el-tag>
+          <el-tag v-if="scope.row.status==1">已服务未评价</el-tag>
+          <el-tag v-if="scope.row.status==2">已服务已评价</el-tag>
+        </template>
+      </el-table-column> -->
+     <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width"> -->
+        <template slot-scope="scope">
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row.id)">查看详情</el-button>         
+          <el-button type="danger"  size="mini" @click="rempveOrder(scope.row.id)">删除订单</el-button>
+        </template>
+     </el-table-column>
     </el-table>
     </el-scrollbar>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getUserList" />
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" >
+      <el-scrollbar>
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="110px" style="height=100%;width: 600px; margin-left:50px;">
+        <el-form-item label="订单名称">
+          <span>{{ temp.product_name }}</span>
+        </el-form-item>
+        <el-form-item label="订单图片">
+          <span><img style="width: 100px;height: 100px;" :src="temp.product_img" alt=""></span>
+        </el-form-item>
+        <el-form-item label="订单描述">
+          <span>{{temp.sku_name}}</span>
+        </el-form-item>
+        <el-form-item label="订单金额">
+          <span>{{ temp.amount }}元</span>
+        </el-form-item>
+        <el-form-item label="下单时间">
+          <span>{{ temp.create_time }}</span>
+        </el-form-item>
+        <el-form-item label="订单号">
+          <span>{{ temp.number }}</span>
+        </el-form-item>
+        <el-form-item label="订单支付状态">
+          <span>{{ temp.pay_status == 0 ? '未支付' : '已支付' }}</span>
+        </el-form-item>
+        <el-form-item label="剩余服务次数">
+          <span>{{ temp.service_times }}</span>
+        </el-form-item>
+         <el-form-item label="用户名称">
+          <span>{{ temp.user_name }}</span>
+        </el-form-item>
+				<!-- <el-form-item label="评价标签">
+				  <span v-for="(aa,index) in temp.tags" :key="index">{{aa}}</span>
+				</el-form-item>
+				<el-form-item label="评价内容">
+				  <span>{{ temp.comment }}</span>
+				</el-form-item>
+				<el-form-item label="评价时间">
+				  <span>{{ temp.create_time }}</span>
+				</el-form-item>
+				<el-form-item label="是否隐藏">
+				  <span v-if="temp.isdel == 0">否</span>
+				  <span v-if="temp.isdel == 1">是</span>
+				</el-form-item> -->
+      </el-form>
+      </el-scrollbar>
+      <div slot="footer" class="dialog-footer">
+        <el-button v-if="temp.isdel == 0" @click="display(temp.id)">隐藏此评价</el-button>
+				<el-button @click="dialogFormVisible = false">取消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
+      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
+        <el-table-column prop="key" label="Channel"/>
+        <el-table-column prop="pv" label="Pv"/>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <style>
@@ -83,13 +186,19 @@
     width: auto;
     max-width: fit-content;
   }
+	.el-dialog{
+		 margin-top: 6vh !important;
+	}
 </style>
 
 <script>
-import { getUserList, modifyUserStatus } from '@/api/index'
+import { getAppointList, getViewListDetail,getMassigstType,deletEvaluate } from '@/api/index'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/util'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+
+// 修改内容
+import { getOrderList,getOrderListDetail,deleteOrder,searchOrder } from '@/api/index'
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -145,6 +254,25 @@ export default {
       if (time == null)
         return ''
       return parseTime(time, timestamp)
+    },
+
+    /**
+     * 修改的部分
+     */
+    dealStatus(status){
+        switch (status){
+            case 0:
+                return '待使用'
+            case 1:
+                return '使用中'
+            case 2:
+                return '已用完'
+            case 3:
+                return '已删除'
+        }
+    },
+    dealProductImg(url){
+        return url
     }
   },
   data() {
@@ -154,26 +282,21 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
+				massagist_id:'',
         page: 1,
         size: 20,
-        nickname: "",
-        phone: "",
+        number: "",
+        date_min: "",
+				date_max: ""
         // inviterPhone: undefined
       },
       importanceOptions: [1, 2, 3],
+			trusteeTypeOptions:'',
       calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
-      temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
-      },
+      temp: "",
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -191,12 +314,23 @@ export default {
     }
   },
   created() {
-    this.getUserList()
+		this.listQuery.number = this.$route.query.orderNum
+    this.getUserList();
+        // this.massagist();
   },
   methods: {
+		selectedChange(){
+			this.getUserList()
+		},
+		massagist(){
+			getMassigstType().then(response => {
+			  this.trusteeTypeOptions = response.data
+			})
+		},
     getUserList(){
       this.listLoading = true
-      getUserList(this.listQuery).then(response => {
+      getOrderList(this.listQuery).then(response => {
+          
         this.list = response.data.list
 				this.total = response.data.count
 				if (this.list.length == this.listQuery.limit)
@@ -208,6 +342,25 @@ export default {
       this.listQuery.page = 1
       this.getUserList()
     },
+		display(id){
+			console.log('eeee',id)
+			deletEvaluate(id).then(response => {
+			   if(response.code == 200){
+			  			this.$message({
+			  					  message: '隐藏评价成功',
+			  					  type: 'success'
+			  					})
+			  					this.handleUpdate();
+									this.dialogFormVisible = false
+			  				}else{
+			  					this.$message({
+			  					  message: response.data,
+			  					  type: 'warning'
+			  					})
+			  				}
+			  this.listLoading = false
+			})
+		},
     handleModifyStatus(row) {
 
       let title = ''
@@ -254,6 +407,36 @@ export default {
       }
       this.handleFilter()
     },
+    // 删除订单
+    rempveOrder(id){
+      this.deleted(id)
+    },
+       // 删除服务
+		deleted(id){
+			const that = this
+			this.$confirm('确认要删除该订单吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          center: true
+        }).then(() => {
+          deleteOrder(id).then(res => {
+            if(res.code == 200){
+          		this.$message({
+          		  message: '删除服务成功',
+          		  type: 'success'
+          		})
+          		this.getUserList();
+          	}else{
+          		this.$message({
+          		  message: res.data,
+          		  type: 'warning'
+          		})
+          	}
+          })
+        }).catch(() => {
+        });
+		},
     resetTemp() {
       this.temp = {
         id: undefined,
@@ -291,14 +474,12 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+    handleUpdate(id) {
+			getOrderListDetail(id).then(response => {
+			  this.temp = response.data
+				this.dialogFormVisible = true
+			})
+      
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {

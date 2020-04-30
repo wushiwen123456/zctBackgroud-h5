@@ -7,7 +7,7 @@
       :on-success="handleImageSuccess"
       class="image-uploader"
       drag
-      action="http://47.52.132.133:8080/admin/upload/index">
+      action="https://zct.51kdd.com/admin/upload">
       <i class="el-icon-upload"/>
       <div class="el-upload__text">Drag或<em>点击上传</em></div>
     </el-upload>
@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     imageUrl() {
-      return this.value == '' ? '' : "http://47.52.132.133:8080/" + this.value 
+      return this.value == '' ? '' : "https://zct.51kdd.com/" + this.value 
     }
   },
   methods: {
@@ -58,6 +58,7 @@ export default {
       const _self = this
       return new Promise((resolve, reject) => {
         getToken().then(response => {
+					console.log(response)
           const key = response.data.qiniu_key
           const token = response.data.qiniu_token
           _self._data.dataObj.token = token

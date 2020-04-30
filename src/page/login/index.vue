@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-      <h3 class="title">Coincobo 数字资产后台管理系统</h3>
+      <h3 class="title">直纯堂孕养康产后台管理系统</h3>
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
@@ -74,6 +74,7 @@ export default {
           this.login(this.loginForm).then((res) => {
             this.loading = false
             if (res.code == 200) {
+							localStorage.setItem('authkey',res.data.token)
               this.$router.push('user/index')
             } else {
               this.sysMsg = res.error;

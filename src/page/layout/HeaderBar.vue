@@ -24,11 +24,11 @@
         </div>
         <el-dialog title="修改密码" :visible.sync="dialog.editPaw.show" :modal-append-to-body="false" custom-class="editPawDialog">
             <el-form :model="editPaw" :rules="editPawRules" ref="editPaw" label-width="100px" >
-                <el-form-item label="旧密码" prop="oldPaw">
-                    <el-input type="password" v-model="editPaw.oldPaw" auto-complete="off"></el-input>
+                <el-form-item label="旧密码" prop="old_pass">
+                    <el-input type="password" v-model="editPaw.old_pass" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="新密码" prop="newPaw">
-                    <el-input type="password" v-model="editPaw.newPaw" @paste.native.capture.prevent="handlePaste" auto-complete="off"></el-input>
+                <el-form-item label="新密码" prop="new_pass">
+                    <el-input type="password" v-model="editPaw.new_pass" @paste.native.capture.prevent="handlePaste" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="确认新密码" prop="confirmNewPaw">
                     <el-input type="password" v-model="editPaw.confirmNewPaw" @paste.native.capture.prevent="handlePaste" auto-complete="off"></el-input>
@@ -54,15 +54,15 @@ export default {
                 }
             },
             editPaw: {
-                oldPaw: '',
-                newPaw: '',
+                old_pass: '',
+                new_pass: '',
                 confirmNewPaw: ''
             },
             editPawRules: {
-                oldPaw: [
+                old_pass: [
                     {required: true, message: '请输入旧密码', trigger: 'blur'}
                 ],
-                newPaw: [
+                new_pass: [
                     {required: true, message: '请输入新密码', trigger: 'blur'},
                     {min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur'},
                     {
@@ -133,21 +133,29 @@ export default {
         editPawSubmit(){
             this.$refs.editPaw.validate((valid) => {
                 if (valid) {
-                    modifyPwd(this.editPaw).then(res => {
-                    if (res.code == 200) {
-                        this.$message({
-                            message: '修改密码成功',
-                            type: 'success'
-                        })
-                        this.$refs.editPaw.resetFields()
-                        this.dialog.editPaw.show = false
-                        } else {
-                        this.$message({
-                            message: res.error,
-                            type: 'error'
-                        })
-                        }
-                    })
+					if(this.editPaw.new_pass == this.editPaw.confirmNewPaw){
+						modifyPwd(this.editPaw).then(res => {
+						if (res.code == 200) {
+						    this.$message({
+						        message: '修改密码成功',
+						        type: 'success'
+						    })
+						    this.$refs.editPaw.resetFields()
+						    this.dialog.editPaw.show = false
+						    } else {
+						    this.$message({
+						        message: res.error,
+						        type: 'error'
+						    })
+						    }
+						})
+					}else{
+						 this.$message({
+						    message: '请确定新密码与再次确定密码一致',
+						    type: 'warning'
+						})
+					}
+                    
 
                     console.log("修改密码表单提交")
                 } else {

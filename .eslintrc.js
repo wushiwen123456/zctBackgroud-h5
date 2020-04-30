@@ -35,7 +35,7 @@ module.exports = {
         "no-undef": "warn",
         "no-unreachable": "warn",
         "no-unused-vars": "warn",
-        "no-use-before-define": "error",
+        "no-use-before-define": "warn",
         "constructor-super": "warn",
         "valid-typeof": "warn"
     }

@@ -135,6 +135,7 @@ const actions = {
                     let component, path, child
                     if (item.level == 1) {
                         component = Home
+						let name = item.name
                         item.name = '/' + item.name
                         path = item.name
                     } else {

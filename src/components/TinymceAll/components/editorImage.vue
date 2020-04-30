@@ -11,7 +11,7 @@
         :on-success="handleSuccess"
         :before-upload="beforeUpload"
         class="editor-slide-upload"
-        action="http://47.52.132.133:8080/admin/upload/index"
+        action="https://zct.51kdd.com/admin/upload"
         list-type="picture-card">
         <el-button size="small" type="primary">点击上传</el-button>
       </el-upload>
@@ -60,7 +60,7 @@ export default {
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
         if (this.listObj[objKeyArr[i]].uid === uid) {
           // this.listObj[objKeyArr[i]].url = response.files.file
-          this.listObj[objKeyArr[i]].url = "http://47.52.132.133:8080/" + response.data
+          this.listObj[objKeyArr[i]].url = "https://zct.51kdd.com/" + response.data
           this.listObj[objKeyArr[i]].hasSuccess = true
           return
         }
@@ -82,11 +82,17 @@ export default {
       const fileName = file.uid
       this.listObj[fileName] = {}
       return new Promise((resolve, reject) => {
-        const img = new Image()
-        img.src = _URL.createObjectURL(file)
-        img.onload = function() {
-          _self.listObj[fileName] = { hasSuccess: false, uid: file.uid, width: this.width, height: this.height }
-        }
+				
+				if (file.type.indexOf('video') == -1){
+					let img = null
+					img = new Image()
+					img.src = _URL.createObjectURL(file)
+					img.onload = function() {
+					  _self.listObj[fileName] = { hasSuccess: false, uid: file.uid, width: this.width, height: this.height, type: 'image' }
+					}
+				} else {
+					_self.listObj[fileName] = { hasSuccess: false, uid: file.uid, width: this.width, height: this.height, type: 'video' }
+				}
         resolve(true)
       })
     }

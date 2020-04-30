@@ -41,8 +41,10 @@ export default {
         // 当通过TagNav来激活页面时也执行一次selectMenu
         $route(){
             let path = this.$route.path
+            console.log(path)
             let indexPath = this.$refs.navbar.items[path].indexPath
-            this.selectMenu(path, indexPath)
+            if(indexPath) this.selectMenu(path, indexPath)
+            
         }
     },
     methods: {

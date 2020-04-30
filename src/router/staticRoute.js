@@ -5,6 +5,24 @@ const staticRoute = [
         path: '/',
         redirect: '/login'
     },
+// 	{
+// 	    path: '/user',
+// 	    component: Layout,
+// 	    children: [
+// 	        {
+// 	            path: 'index',
+// 	            component: () => import(/* webpackChunkName: 'example' */ '../page/user/index')
+// 	        },
+// 	        {
+// 	            path: 'charts',
+// 	            component: () => import(/* webpackChunkName: 'example' */ '../page/example/charts')
+// 	        },
+// 	        {
+// 	            path: 'map',
+// 	            component: () => import(/* webpackChunkName: 'example' */ '../page/example/map')
+// 	        }
+// 	    ]
+// 	},
     {
         path: '/error',
         component: () => import(/* webpackChunkName: 'error' */ '../page/error'),

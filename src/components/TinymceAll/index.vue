@@ -11,6 +11,7 @@
 import editorImage from './components/editorImage'
 import plugins from './plugins'
 import toolbar from './toolbar'
+import {parseHtml} from '@/util/html-parser'
 
 export default {
   name: 'Tinymce',
@@ -26,6 +27,10 @@ export default {
       type: String,
       default: ''
     },
+		relaunch: {
+		  type: Boolean,
+		  default: false
+		},
     toolbar: {
       type: Array,
       required: false,
@@ -63,14 +68,25 @@ export default {
   },
   watch: {
     value(val) {
+// 			let content = parseHtml(val)
+// 			if (content.length > 0){
+// 				for (let item in content){
+// 					this.parseNode(item)
+// 				}
+// 			}
+			// alert('hasChange' + this.hasChange)
       if (!this.hasChange && this.hasInit) {
-        this.$nextTick(() =>
-          window.tinymce.get(this.tinymceId).setContent(val || ''))
+				window.tinymce.get(this.tinymceId).setContent(val || '')
+        // this.$nextTick(() =>
+        //   window.tinymce.get(this.tinymceId).setContent(val || ''))
       }
     },
-    language() {
-      this.destroyTinymce()
-      this.$nextTick(() => this.initTinymce())
+    relaunch() {
+   //    this.destroyTinymce()
+			// this.initTinymce()
+			this.hasChange = false
+			// this.hasInit = false
+      // this.$nextTick(() => )
     }
   },
   mounted() {
@@ -86,17 +102,32 @@ export default {
     this.destroyTinymce()
   },
   methods: {
+		parseNode(node){
+			if (node.name == 'img') {
+				node.attrs.class = 'wscnph'
+			}
+			if (node.children.length > 0) {
+				for (let item in node.children) {
+					this.parseNode(item)
+				}
+			}
+		},
     initTinymce() {
       const _this = this
       window.tinymce.init({
         language: this.language,
         selector: `#${this.tinymceId}`,
         height: this.height,
+				forced_root_block: '',
         body_class: 'panel-body ',
         object_resizing: false,
         toolbar: this.toolbar.length > 0 ? this.toolbar : toolbar,
         menubar: this.menubar,
         plugins: plugins,
+				content_css : "static/tinymce4.7.5/tiny-content.css",
+				content_style : `
+				img                       { width:100%; margin: 100px 0; display:block; }
+			`,
         end_container_on_empty_block: true,
         powerpaste_word_import: 'clean',
         code_dialog_height: 450,
@@ -177,7 +208,12 @@ export default {
     imageSuccessCBK(arr) {
       const _this = this
       arr.forEach(v => {
-        window.tinymce.get(_this.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`)
+				if (v.type == 'image'){
+					window.tinymce.get(_this.tinymceId).insertContent(`<img style="width:100%; margin: 10px 0" class="wscnph" src="${v.url}" >`)	
+				} else {
+					window.tinymce.get(_this.tinymceId).insertContent(`<video style="width: 100%;" src="${v.url}" enable-progress-gesture show-center-play-btn show-progress show-fullscreen-btn controls></video>`)
+				}
+        
       })
     }
   }

@@ -2,6 +2,7 @@
 import 'sysStatic/css/theme-default.scss'
 // import '../mock/index.js'
 
+
 import 'babel-polyfill'
 import Vue from "vue"
 import ElementUI from 'element-ui'
@@ -18,7 +19,7 @@ import './icons' // icon
 
 // 注册组件到Vue
 Vue.prototype.$axios = axios
-Vue.prototype.$static = 'http://47.52.132.133:8080/'
+Vue.prototype.$static = 'http://zct.51kdd.com/'
 Vue.use(ElementUI, {
     i18n: (key, value) => i18n.t(key, value)
 })
